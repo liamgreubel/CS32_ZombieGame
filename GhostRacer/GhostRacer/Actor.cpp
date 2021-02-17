@@ -48,6 +48,7 @@ void GhostRacer::doSomething()
         if(direction > 90)  //if facing left
             m_hp -= 10;
         direction = 82;
+        setDirection(direction);
         m_world->playSound(SOUND_VEHICLE_CRASH);
     }
     //3. If the Ghost Racer's center X coordinate is greater than or equal to the right road boundary
@@ -56,6 +57,7 @@ void GhostRacer::doSomething()
         if(direction < 90)  //if facing right
             m_hp -= 10;
         direction = 98;
+        setDirection(direction);
         m_world->playSound(SOUND_VEHICLE_CRASH);
     }
         
