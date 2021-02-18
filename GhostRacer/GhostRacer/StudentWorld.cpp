@@ -22,6 +22,7 @@ int StudentWorld::init()
 {
     GhostRacer* liam = new GhostRacer(this);
     m_vector.push_back(liam);
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
