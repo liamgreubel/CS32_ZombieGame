@@ -16,10 +16,10 @@ public:
     virtual int init();
     virtual int move();
     virtual void cleanUp();
-    StudentWorld* getStudentWorld();
+    void remove();
+    StudentWorld* getStudentWorld() {return this;}
 private:
     std::vector<Actor*> m_vector;
-    StudentWorld* m_this;
 };
 
 #endif // STUDENTWORLD_H_

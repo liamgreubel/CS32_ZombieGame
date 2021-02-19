@@ -22,9 +22,16 @@ GhostRacer::GhostRacer(StudentWorld* wrld)
     m_holyWater = 10;
     m_hp = 100;
     avoidCollision = true;
-    //m_world = wrld;
 }
 
+bool Actor::isOverlap(Actor* other)
+{
+    int delta_x = abs(getX() - other->getX());
+    int delta_y = abs(getY() - other->getY());
+    int radius_sum = getRadius() + other->getRadius();
+    
+    return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
+}
 
 //GHOSTRACER CLASS
 GhostRacer::~GhostRacer()
@@ -39,50 +46,45 @@ void GhostRacer::doSomething()
     if(m_hp <= 0)
         return;
     //2. If the Ghost Racer's center X coordinate is less than or equal to the left road boundary (meaning it’s swerving off the road):
-    if(getX() <= 0) //left boundary
+    if(getX() <= ROAD_CENTER - ROAD_WIDTH/2) //left boundary
     {
         if(direction > 90)  //if facing left
             m_hp -= 10;
         direction = 82;
         setDirection(direction);
-        /*m_world*/getWorld()->playSound(SOUND_VEHICLE_CRASH);
+        getWorld()->playSound(SOUND_VEHICLE_CRASH);
     }
     //3. If the Ghost Racer's center X coordinate is greater than or equal to the right road boundary
-    if(getX() >= VIEW_WIDTH-1)   //right boundary
+    if(getX() >= ROAD_CENTER + ROAD_WIDTH/2)   //right boundary
     {
         if(direction < 90)  //if facing right
             m_hp -= 10;
         direction = 98;
         setDirection(direction);
-        /*m_world*/getWorld()->playSound(SOUND_VEHICLE_CRASH);
+        getWorld()->playSound(SOUND_VEHICLE_CRASH);
     }
     //4. The Ghost Racer must check to see if the player pressed a key (the section below shows how to check this). If the player pressed a key:
     if(getWorld()->getKey(ch))
     {   //TODO: IMPLEMENT 4.A.I & 4.A.II
         switch(ch)
         {
-            //a. Player pressed space key
             case KEY_PRESS_SPACE:
                 break;
-            //b. Player pressed left key
             case KEY_PRESS_LEFT:
                 if(direction < 114)
                     direction += 8;
                 break;
-            //c. player pressed right key
             case KEY_PRESS_RIGHT:
                 if(direction > 66)
                     direction -= 8;
                 break;
-            //d. player pressed up key
             case KEY_PRESS_UP:
                 if(m_speed < 5)
                     m_speed++;
                 break;
-            //e. player pressed down key
             case KEY_PRESS_DOWN:
                 if(m_speed > -1)
-                    m_speed++;
+                    m_speed--;
                 break;
         }
     }
@@ -94,21 +96,19 @@ void GhostRacer::doSomething()
     moveTo(cur_x + delta_x, cur_y);
 }
 //TODO: implement method without trivial bool return type. instead return unique string? (see groupme screenshots)
-bool GhostRacer::isAlive()
-{ return true; }
-/*
-StudentWorld* GhostRacer::getWorld()
-{
-    return m_world;
-}*/
+
 
 
 //BORDERLINE CLASS
 BorderLine::BorderLine(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world, GhostRacer* racer)
-: Actor(imageID, startX, startY, 0, 2.0,1,getWorld())
+: Actor(imageID, startX, startY, 0, 2.0,1,world)
 {
     m_world = world;
     m_racer = racer;
+    m_speed = -4;
+    x = startX; y = startY;
+    m_hp = 1;
+    //m_alive = true;
 }
 
 BorderLine::~BorderLine()
@@ -116,19 +116,30 @@ BorderLine::~BorderLine()
 
 void BorderLine::doSomething()
 {
-    //GhostRacer* racee = new GhostRacer(getWorld());
+    int curr_speed = m_speed;
+    int car_speed = m_racer->getSpeed();
+    int vert_speed = curr_speed - car_speed;
+    int new_y = getY() + vert_speed;
+    m_speed = vert_speed;
+    moveTo(x,new_y);
+    if(y < 0 || y > VIEW_HEIGHT)
+    {
+        //set to not alive
+        m_hp--;
+        return;
+    }
 }
 
 
 //YELLOW CLASS
 Yellow::Yellow(int x, int y, StudentWorld* world, GhostRacer* racer)
 : BorderLine(IID_YELLOW_BORDER_LINE,x,y,0,2.0,1,world,racer)
-{}
+{
+    m_hp = 1;
+    m_speed = -4;
+}
 
 Yellow::~Yellow() {}
 
 
-void Yellow::doSomething()
-{
-    //int vert_speed = racer->getRacer();
-}
+

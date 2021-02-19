@@ -11,15 +11,18 @@ class Actor : public GraphObject
 public:
     Actor(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world);
     virtual void doSomething() = 0;
-    virtual bool isAlive() = 0;
-    virtual int getSpeed() {return m_speed;}
+    int getHP() {return m_hp;}
+    bool isAlive() {return m_hp > 0;}
     StudentWorld* getWorld() {return m_world;}
-    //virtual StudentWorld* getWorld() {return m_world;}
     virtual ~Actor();
+    bool isOverlap(Actor* other);
 private:
     bool m_isActive;
     int m_speed;
+    int m_hp;
+    bool m_alive;
     StudentWorld* m_world;
+    //Actor* other;
 };
 
 class GhostRacer : public Actor
@@ -27,16 +30,16 @@ class GhostRacer : public Actor
 public:
     GhostRacer(StudentWorld* world);
     virtual void doSomething();
-    virtual bool isAlive();
+    //virtual bool isAlive();
     virtual ~GhostRacer();
-    //StudentWorld* getWorld() {return world;}
-    GhostRacer* getRacer();
+    int getSpeed() {return m_speed;}
+    //GhostRacer* getRacer();
 private:
     int m_speed;
     int m_holyWater;
     int m_hp;
     bool avoidCollision;
-    //StudentWorld* m_world;
+    StudentWorld* m_world;
     GhostRacer* m_racer;
 };
 
@@ -46,14 +49,13 @@ public:
     BorderLine(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world, GhostRacer* m_racer);
     virtual ~BorderLine();
     virtual void doSomething();
-    virtual bool isAlive() {return false;}
-    virtual GhostRacer* getRacer() {return m_racer;}
-    virtual StudentWorld* getWorld() {return m_world;}
+    GhostRacer* getRacer() {return m_racer;}
 private:
     int m_speed;
-    bool m_Alive;
+    int x,y;
     StudentWorld* m_world;
     GhostRacer* m_racer;
+    int m_hp;
 };
 
 class Yellow : public BorderLine
@@ -61,9 +63,10 @@ class Yellow : public BorderLine
 public:
     Yellow(int x, int y, StudentWorld* world, GhostRacer* racer);
     virtual ~Yellow();
-    virtual void doSomething();
+    //virtual void doSomething();
 private:
     int m_speed;
+    int m_hp;
     StudentWorld* m_world;
     GhostRacer* racer;
 };
