@@ -83,7 +83,7 @@ void GhostRacer::doSomething()
                     m_speed++;
                 break;
             case KEY_PRESS_DOWN:
-                if(m_speed > -1)
+                if(m_speed > 0)
                     m_speed--;
                 break;
         }
@@ -109,6 +109,7 @@ BorderLine::BorderLine(int imageID, int startX, int startY, int dir, double sz, 
     x = startX; y = startY;
     m_hp = 1;
     //m_alive = true;
+    m_racerSpeed = 0;
 }
 
 BorderLine::~BorderLine()
@@ -118,9 +119,14 @@ void BorderLine::doSomething()
 {
     int curr_speed = m_speed;
     int car_speed = m_racer->getSpeed();
+    m_racerSpeed = car_speed;
     int vert_speed = curr_speed - car_speed;
     int new_y = getY() + vert_speed;
     m_speed = vert_speed;
+    if(m_speed < -8)
+        m_speed = -8;
+    if(m_speed >= -1)
+        m_speed = -1;
     moveTo(x,new_y);
     if(y < 0 || y > VIEW_HEIGHT)
     {
@@ -142,4 +148,13 @@ Yellow::Yellow(int x, int y, StudentWorld* world, GhostRacer* racer)
 Yellow::~Yellow() {}
 
 
+//WHITE CLASS
+White::White(int x, int y, StudentWorld* world, GhostRacer* racer)
+: BorderLine(IID_WHITE_BORDER_LINE, x, y, 0, 2.0, 1, world, racer)
+{
+    m_hp = 1;
+    m_speed = -4;
+}
+
+White::~White() {};
 

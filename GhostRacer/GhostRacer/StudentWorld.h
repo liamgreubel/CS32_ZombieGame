@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+class GhostRacer;
+
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
 class Actor;
@@ -20,6 +22,7 @@ public:
     StudentWorld* getStudentWorld() {return this;}
 private:
     std::vector<Actor*> m_vector;
+    GhostRacer* temp;
 };
 
 #endif // STUDENTWORLD_H_

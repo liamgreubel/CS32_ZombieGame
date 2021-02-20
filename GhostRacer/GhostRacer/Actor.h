@@ -50,8 +50,10 @@ public:
     virtual ~BorderLine();
     virtual void doSomething();
     GhostRacer* getRacer() {return m_racer;}
+    bool hp() {return m_hp;}
 private:
     int m_speed;
+    int m_racerSpeed;
     int x,y;
     StudentWorld* m_world;
     GhostRacer* m_racer;
@@ -63,7 +65,18 @@ class Yellow : public BorderLine
 public:
     Yellow(int x, int y, StudentWorld* world, GhostRacer* racer);
     virtual ~Yellow();
-    //virtual void doSomething();
+private:
+    int m_speed;
+    int m_hp;
+    StudentWorld* m_world;
+    GhostRacer* racer;
+};
+
+class White : public BorderLine
+{
+public:
+    White(int x, int y, StudentWorld* world, GhostRacer* racer);
+    virtual ~White();
 private:
     int m_speed;
     int m_hp;
