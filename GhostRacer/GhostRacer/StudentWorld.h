@@ -25,7 +25,7 @@ public:
 private:
     std::vector<Actor*> m_vector;
     double y;
-    GhostRacer* temp;
+    GhostRacer* m_racer;
 };
 
 #endif // STUDENTWORLD_H_

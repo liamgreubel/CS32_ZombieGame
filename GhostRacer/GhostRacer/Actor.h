@@ -32,10 +32,8 @@ class GhostRacer : public Actor
 public:
     GhostRacer(StudentWorld* world);
     virtual void doSomething();
-    //virtual bool isAlive();
     virtual ~GhostRacer();
     int getSpeed() {return m_speed;}
-    //GhostRacer* getRacer();
 private:
     int m_speed;
     int m_holyWater;

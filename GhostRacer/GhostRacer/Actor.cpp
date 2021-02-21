@@ -43,10 +43,8 @@ void GhostRacer::doSomething()
     int ch;
     int direction = getDirection();
     double max_shift_per_tick = 4.0;
-    //1. If the Ghost Racer is not currently alive (i.e., its hit points are zero or less), its doSomething() method must return immediately – none of the following steps should be performed.
     if(m_hp <= 0)
         return;
-    //2. If the Ghost Racer's center X coordinate is less than or equal to the left road boundary (meaning it’s swerving off the road):
     if(getX() <= ROAD_CENTER - ROAD_WIDTH/2) //left boundary
     {
         if(direction > 90)  //if facing left
@@ -55,7 +53,6 @@ void GhostRacer::doSomething()
         setDirection(direction);
         getWorld()->playSound(SOUND_VEHICLE_CRASH);
     }
-    //3. If the Ghost Racer's center X coordinate is greater than or equal to the right road boundary
     if(getX() >= ROAD_CENTER + ROAD_WIDTH/2)   //right boundary
     {
         if(direction < 90)  //if facing right
@@ -64,7 +61,6 @@ void GhostRacer::doSomething()
         setDirection(direction);
         getWorld()->playSound(SOUND_VEHICLE_CRASH);
     }
-    //4. The Ghost Racer must check to see if the player pressed a key (the section below shows how to check this). If the player pressed a key:
     if(getWorld()->getKey(ch))
     {   //TODO: IMPLEMENT 4.A.I & 4.A.II
         switch(ch)
@@ -89,14 +85,13 @@ void GhostRacer::doSomething()
                 break;
         }
     }
-    //5. Ghost Racer must attempt to move using the Ghost Racer Movement Algorithm described in the section below.
     setDirection(direction);
     double delta_x = cos( (direction) * M_PI / 180 ) * max_shift_per_tick;
     double cur_x = getX();
     double cur_y = getY();
     moveTo(cur_x + delta_x, cur_y);
 }
-//TODO: implement method without trivial bool return type. instead return unique string? (see groupme screenshots)
+//TODO: implement method without trivial bool return type. instead return unique string? (see notes)
 
 
 

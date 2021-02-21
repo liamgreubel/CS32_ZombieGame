@@ -19,7 +19,7 @@ StudentWorld::StudentWorld(string assetPath)
 int StudentWorld::init()
 {
     GhostRacer* liam = new GhostRacer(this);
-    temp = liam;
+    m_racer = liam;
     m_vector.push_back(liam);
     int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
     int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
@@ -54,8 +54,7 @@ int StudentWorld::move()
     int M = VIEW_HEIGHT / (4 * SPRITE_HEIGHT);
     int left_middle = LEFT_EDGE + (ROAD_WIDTH / 3);
     int right_middle = RIGHT_EDGE - (ROAD_WIDTH / 3);
-    // This code is here merely to allow the game to build, run, and terminate after you hit enter.
-    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
+
     for(int i = 0 ; i < m_vector.size(); i++)
     {
         if(m_vector.at(i)->getAlive())
@@ -112,26 +111,25 @@ void StudentWorld::insert()
     
     
     double new_border_y = (double)VIEW_HEIGHT - (double)SPRITE_HEIGHT;
-    y = y - 4 - temp->getSpeed();
+    y = y - 4 - m_racer->getSpeed();
     double last_y = y;
     double delta_y = new_border_y - last_y;
     if(delta_y >= SPRITE_HEIGHT)
     {
-        Yellow* leftLine = new Yellow(LEFT_EDGE,/*VIEW_HEIGHT*/new_border_y,this,temp);
+        Yellow* leftLine = new Yellow(LEFT_EDGE,VIEW_HEIGHT/*new_border_y*/,this,m_racer);
         m_vector.push_back(leftLine);
-        Yellow* rightLine = new Yellow(RIGHT_EDGE,/*VIEW_HEIGHT*/new_border_y,this,temp);
+        Yellow* rightLine = new Yellow(RIGHT_EDGE,VIEW_HEIGHT/*new_border_y*/,this,m_racer);
         m_vector.push_back(rightLine);
     }
     if(delta_y >= (4*SPRITE_HEIGHT))
     {
 
-        White* leftLine = new White(left_middle,/*VIEW_HEIGHT*/new_border_y,this,temp);
+        White* leftLine = new White(left_middle,new_border_y,this,m_racer);
         m_vector.push_back(leftLine);
-        White* rightLine = new White(right_middle,/*VIEW_HEIGHT*/new_border_y,this,temp);
+        White* rightLine = new White(right_middle,new_border_y,this,m_racer);
         m_vector.push_back(rightLine);
         
         y = (m_vector.back())->getY();
-
     }
     
 
