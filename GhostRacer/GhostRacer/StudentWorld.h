@@ -15,13 +15,16 @@ class StudentWorld : public GameWorld
 {
 public:
     StudentWorld(std::string assetPath);
+    virtual ~StudentWorld();
     virtual int init();
     virtual int move();
     virtual void cleanUp();
     void remove();
+    void insert();
     StudentWorld* getStudentWorld() {return this;}
 private:
     std::vector<Actor*> m_vector;
+    double y;
     GhostRacer* temp;
 };
 

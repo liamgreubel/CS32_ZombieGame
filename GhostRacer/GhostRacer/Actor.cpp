@@ -10,6 +10,7 @@ Actor::Actor(int imageID, int startX, int startY, int dir, double sz, int depth,
 : GraphObject(imageID, startX, startY, dir, sz, depth)
 {
     m_world = world;
+    m_alive = true;
 }
 
 Actor::~Actor()
@@ -117,23 +118,13 @@ BorderLine::~BorderLine()
 
 void BorderLine::doSomething()
 {
-    int curr_speed = m_speed;
-    int car_speed = m_racer->getSpeed();
-    m_racerSpeed = car_speed;
-    int vert_speed = curr_speed - car_speed;
-    int new_y = getY() + vert_speed;
-    m_speed = vert_speed;
-    if(m_speed < -8)
-        m_speed = -8;
-    if(m_speed >= -1)
-        m_speed = -1;
-    moveTo(x,new_y);
-    if(y < 0 || y > VIEW_HEIGHT)
-    {
-        //set to not alive
-        m_hp--;
-        return;
-    }
+    int v_speed = m_speed - m_racer->getSpeed();
+    int h_speed = 0;
+    double new_y = getY() + v_speed;
+    double new_x = getX() + h_speed;
+    moveTo(new_x,new_y);
+    if(getY() < 0 || getY() > VIEW_HEIGHT)
+        setDead();
 }
 
 

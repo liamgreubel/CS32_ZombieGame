@@ -13,6 +13,8 @@ public:
     virtual void doSomething() = 0;
     int getHP() {return m_hp;}
     bool isAlive() {return m_hp > 0;}
+    bool getAlive() {return m_alive;}
+    void setDead() {m_alive = false;}
     StudentWorld* getWorld() {return m_world;}
     virtual ~Actor();
     bool isOverlap(Actor* other);
@@ -54,7 +56,7 @@ public:
 private:
     int m_speed;
     int m_racerSpeed;
-    int x,y;
+    int x,y,lastY;
     StudentWorld* m_world;
     GhostRacer* m_racer;
     int m_hp;
