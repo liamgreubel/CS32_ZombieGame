@@ -17,8 +17,12 @@ public:
     void setDead() {m_alive = false;}
     StudentWorld* getWorld() {return m_world;}
     virtual ~Actor();
+    void setCollision(bool col) {m_isCollision = col;}
+    bool getCollision() {return m_isCollision;}
     bool isOverlap(Actor* other);
+    virtual int getSpeed() {return m_speed;}
 private:
+    bool m_isCollision;
     bool m_isActive;
     int m_speed;
     int m_hp;
@@ -27,7 +31,31 @@ private:
     //Actor* other;
 };
 
-class GhostRacer : public Actor
+class hasHP : public Actor
+{
+public:
+    hasHP(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world);
+    virtual ~hasHP();
+    int getHP() {return m_hp;}
+    void setHP(int hpToSet) {m_hp = hpToSet;}
+    int getSpeed() {return m_speed;}
+    void setSpeed(int newSpeed) {m_speed = newSpeed;}
+private:
+    int m_hp;
+    int m_speed;
+};
+
+class noHP : public Actor
+{
+public:
+    noHP(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world);
+    virtual ~noHP();
+private:
+};
+
+
+//*/
+class GhostRacer : public hasHP
 {
 public:
     GhostRacer(StudentWorld* world);
@@ -43,7 +71,7 @@ private:
     GhostRacer* m_racer;
 };
 
-class BorderLine : public Actor
+class BorderLine : public noHP
 {
 public:
     BorderLine(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world, GhostRacer* m_racer);

@@ -16,15 +16,6 @@ Actor::Actor(int imageID, int startX, int startY, int dir, double sz, int depth,
 Actor::~Actor()
 {}
 
-GhostRacer::GhostRacer(StudentWorld* wrld)
-: Actor(IID_GHOST_RACER,128,32,90,4.0,0,wrld)
-{
-    m_speed = 0;
-    m_holyWater = 10;
-    m_hp = 100;
-    avoidCollision = true;
-}
-
 bool Actor::isOverlap(Actor* other)
 {
     int delta_x = abs(getX() - other->getX());
@@ -33,6 +24,33 @@ bool Actor::isOverlap(Actor* other)
     
     return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
 }
+
+
+hasHP::hasHP(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world)
+: Actor(imageID, startX, startY, dir, sz, depth, world), m_hp(0), m_speed(0)
+{}
+
+hasHP::~hasHP() {}
+
+
+
+noHP::noHP(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world)
+: Actor(imageID, startX, startY, dir, sz, depth, world)
+{}
+
+noHP::~noHP() {}
+
+
+GhostRacer::GhostRacer(StudentWorld* wrld)
+: hasHP(IID_GHOST_RACER,128,32,90,4.0,0,wrld)
+{
+    m_speed = 0;
+    m_holyWater = 10;
+    m_hp = 100;
+    avoidCollision = true;
+}
+
+
 
 //GHOSTRACER CLASS
 GhostRacer::~GhostRacer()
@@ -80,7 +98,7 @@ void GhostRacer::doSomething()
                     m_speed++;
                 break;
             case KEY_PRESS_DOWN:
-                if(m_speed > 0)
+                if(m_speed > -1)
                     m_speed--;
                 break;
         }
@@ -97,7 +115,7 @@ void GhostRacer::doSomething()
 
 //BORDERLINE CLASS
 BorderLine::BorderLine(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world, GhostRacer* racer)
-: Actor(imageID, startX, startY, 0, 2.0,1,world)
+: noHP(imageID, startX, startY, 0, 2.0,1,world)
 {
     m_world = world;
     m_racer = racer;

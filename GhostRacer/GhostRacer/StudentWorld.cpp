@@ -116,9 +116,9 @@ void StudentWorld::insert()
     double delta_y = new_border_y - last_y;
     if(delta_y >= SPRITE_HEIGHT)
     {
-        Yellow* leftLine = new Yellow(LEFT_EDGE,VIEW_HEIGHT/*new_border_y*/,this,m_racer);
+        Yellow* leftLine = new Yellow(LEFT_EDGE,VIEW_HEIGHT,this,m_racer);
         m_vector.push_back(leftLine);
-        Yellow* rightLine = new Yellow(RIGHT_EDGE,VIEW_HEIGHT/*new_border_y*/,this,m_racer);
+        Yellow* rightLine = new Yellow(RIGHT_EDGE,VIEW_HEIGHT,this,m_racer);
         m_vector.push_back(rightLine);
     }
     if(delta_y >= (4*SPRITE_HEIGHT))
