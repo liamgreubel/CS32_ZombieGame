@@ -18,7 +18,7 @@ StudentWorld::StudentWorld(string assetPath)
 
 int StudentWorld::init()
 {
-    GhostRacer* liam = new GhostRacer(this);
+    GhostRacer* liam = new GhostRacer(128, 32, this);
     m_racer = liam;
     m_vector.push_back(liam);
     int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
@@ -29,16 +29,16 @@ int StudentWorld::init()
     int right_middle = RIGHT_EDGE - (ROAD_WIDTH / 3);
     for(int i = 0; i < N; i++)
     {
-        Yellow* leftLine = new Yellow(LEFT_EDGE,i*SPRITE_HEIGHT,this,liam);
+        Yellow* leftLine = new Yellow(LEFT_EDGE,i*SPRITE_HEIGHT,this);
         m_vector.push_back(leftLine);
-        Yellow* rightLine = new Yellow(RIGHT_EDGE,i*SPRITE_HEIGHT,this,liam);
+        Yellow* rightLine = new Yellow(RIGHT_EDGE,i*SPRITE_HEIGHT,this);
         m_vector.push_back(rightLine);
     }
     for(int j = 0; j < M; j++)
     {
-        White* left = new White(left_middle,4*j*SPRITE_HEIGHT,this,liam);
+        White* left = new White(left_middle,4*j*SPRITE_HEIGHT,this);
         m_vector.push_back(left);
-        White* right = new White(right_middle,4*j*SPRITE_HEIGHT,this,liam);
+        White* right = new White(right_middle,4*j*SPRITE_HEIGHT,this);
         m_vector.push_back(right);
     }
     y = m_vector.back()->getY();
@@ -48,16 +48,9 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
-    int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
-    int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
-    int N = VIEW_HEIGHT / SPRITE_HEIGHT;
-    int M = VIEW_HEIGHT / (4 * SPRITE_HEIGHT);
-    int left_middle = LEFT_EDGE + (ROAD_WIDTH / 3);
-    int right_middle = RIGHT_EDGE - (ROAD_WIDTH / 3);
-
     for(int i = 0 ; i < m_vector.size(); i++)
     {
-        if(m_vector.at(i)->getAlive())
+        if(!m_vector.at(i)->isDead())
         {
             m_vector.at(i)->doSomething();
 
@@ -67,7 +60,7 @@ int StudentWorld::move()
     insert();
 
     return GWSTATUS_CONTINUE_GAME;
-} //end move()
+}
 
 void StudentWorld::cleanUp() //use loop w std::iterator to delete all actors at the end
 {
@@ -85,7 +78,7 @@ void StudentWorld::remove()
     vector<Actor*>::iterator it;
     for(it = m_vector.begin(); it != m_vector.end();)
     {
-        if( !((*it)->getAlive()) )
+        if( (*it)->isDead() )
         {
             delete *it;
             it = m_vector.erase(it);
@@ -104,29 +97,27 @@ void StudentWorld::insert()
 {
     int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
     int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
-    int N = VIEW_HEIGHT / SPRITE_HEIGHT;
-    int M = VIEW_HEIGHT / (4 * SPRITE_HEIGHT);
     int left_middle = LEFT_EDGE + (ROAD_WIDTH / 3);
     int right_middle = RIGHT_EDGE - (ROAD_WIDTH / 3);
     
     
     double new_border_y = (double)VIEW_HEIGHT - (double)SPRITE_HEIGHT;
-    y = y - 4 - m_racer->getSpeed();
+    y = y - 4 - m_racer->getVerticalSpeed();
     double last_y = y;
     double delta_y = new_border_y - last_y;
     if(delta_y >= SPRITE_HEIGHT)
     {
-        Yellow* leftLine = new Yellow(LEFT_EDGE,VIEW_HEIGHT,this,m_racer);
+        Yellow* leftLine = new Yellow(LEFT_EDGE,VIEW_HEIGHT,this);
         m_vector.push_back(leftLine);
-        Yellow* rightLine = new Yellow(RIGHT_EDGE,VIEW_HEIGHT,this,m_racer);
+        Yellow* rightLine = new Yellow(RIGHT_EDGE,VIEW_HEIGHT,this);
         m_vector.push_back(rightLine);
     }
     if(delta_y >= (4*SPRITE_HEIGHT))
     {
 
-        White* leftLine = new White(left_middle,new_border_y,this,m_racer);
+        White* leftLine = new White(left_middle,new_border_y,this);
         m_vector.push_back(leftLine);
-        White* rightLine = new White(right_middle,new_border_y,this,m_racer);
+        White* rightLine = new White(right_middle,new_border_y,this);
         m_vector.push_back(rightLine);
         
         y = (m_vector.back())->getY();

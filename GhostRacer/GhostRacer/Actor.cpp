@@ -1,72 +1,57 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+#include "GameConstants.h"
 #include <cmath>
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 
 
 //ACTOR CLASS
-Actor::Actor(int imageID, int startX, int startY, int dir, double sz, int depth,StudentWorld* world)
-: GraphObject(imageID, startX, startY, dir, sz, depth)
-{
-    m_world = world;
-    m_alive = true;
-}
+Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
+: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0)
+{}
 
 Actor::~Actor()
 {}
 
 bool Actor::isOverlap(Actor* other)
 {
-    int delta_x = abs(getX() - other->getX());
-    int delta_y = abs(getY() - other->getY());
-    int radius_sum = getRadius() + other->getRadius();
+    double delta_x = abs(getX() - other->getX());
+    double delta_y = abs(getY() - other->getY());
+    double radius_sum = getRadius() + other->getRadius();
     
     return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
 }
 
 
-hasHP::hasHP(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world)
-: Actor(imageID, startX, startY, dir, sz, depth, world), m_hp(0), m_speed(0)
+
+Agent::Agent(int imageID, double startX, double startY, int dir, double sz, int hp, StudentWorld* world)
+: Actor(imageID, startX, startY, dir, sz, 0, world), m_hp(hp)
 {}
 
-hasHP::~hasHP() {}
+Agent::~Agent() {}
 
 
-
-noHP::noHP(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world)
-: Actor(imageID, startX, startY, dir, sz, depth, world)
-{}
-
-noHP::~noHP() {}
-
-
-GhostRacer::GhostRacer(StudentWorld* wrld)
-: hasHP(IID_GHOST_RACER,128,32,90,4.0,0,wrld)
+GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_waterActive(false)
 {
-    m_speed = 0;
-    m_holyWater = 10;
-    m_hp = 100;
-    avoidCollision = true;
+    setVerticalSpeed(0);
 }
 
+GhostRacer::~GhostRacer() {}
 
-
-//GHOSTRACER CLASS
-GhostRacer::~GhostRacer()
-{}
 
 void GhostRacer::doSomething()
 {
     int ch;
     int direction = getDirection();
     double max_shift_per_tick = 4.0;
-    if(m_hp <= 0)
+    if(getHP() <= 0)
         return;
     if(getX() <= ROAD_CENTER - ROAD_WIDTH/2) //left boundary
     {
         if(direction > 90)  //if facing left
-            m_hp -= 10;
+            changeHP(-10);
         direction = 82;
         setDirection(direction);
         getWorld()->playSound(SOUND_VEHICLE_CRASH);
@@ -74,16 +59,30 @@ void GhostRacer::doSomething()
     if(getX() >= ROAD_CENTER + ROAD_WIDTH/2)   //right boundary
     {
         if(direction < 90)  //if facing right
-            m_hp -= 10;
+            changeHP(-10);
         direction = 98;
         setDirection(direction);
         getWorld()->playSound(SOUND_VEHICLE_CRASH);
     }
     if(getWorld()->getKey(ch))
-    {   //TODO: IMPLEMENT 4.A.I & 4.A.II
+    {
         switch(ch)
         {
             case KEY_PRESS_SPACE:
+                if(getNumSprays() > 0)
+                {
+                    int spray_x;
+                    if(direction > 90)
+                        spray_x = getX() - SPRITE_HEIGHT;
+                    if(direction < 90)
+                        spray_x = getX() + SPRITE_HEIGHT;
+                    else
+                        spray_x = getX();
+                    //Spray* new_spray = new Spray(spray_x,getY() + SPRITE_HEIGHT,direction,getWorld());
+
+                    getWorld()->playSound(SOUND_PLAYER_SPRAY);
+                    increaseSprays(-1);
+                }
                 break;
             case KEY_PRESS_LEFT:
                 if(direction < 114)
@@ -94,12 +93,12 @@ void GhostRacer::doSomething()
                     direction -= 8;
                 break;
             case KEY_PRESS_UP:
-                if(m_speed < 5)
-                    m_speed++;
+                if(getVerticalSpeed() < 5)
+                    setVerticalSpeed(getVerticalSpeed() + 1);
                 break;
             case KEY_PRESS_DOWN:
-                if(m_speed > -1)
-                    m_speed--;
+                if(getVerticalSpeed() > -1)
+                    setVerticalSpeed(getVerticalSpeed() - 1);
                 break;
         }
     }
@@ -109,21 +108,14 @@ void GhostRacer::doSomething()
     double cur_y = getY();
     moveTo(cur_x + delta_x, cur_y);
 }
-//TODO: implement method without trivial bool return type. instead return unique string? (see notes)
-
 
 
 //BORDERLINE CLASS
-BorderLine::BorderLine(int imageID, int startX, int startY, int dir, double sz, int depth, StudentWorld* world, GhostRacer* racer)
-: noHP(imageID, startX, startY, 0, 2.0,1,world)
+BorderLine::BorderLine(int imageID, double startX, double startY, StudentWorld* world)
+: Actor(imageID, startX, startY, 0, 2.0, 1, world)
 {
-    m_world = world;
-    m_racer = racer;
-    m_speed = -4;
-    x = startX; y = startY;
-    m_hp = 1;
-    //m_alive = true;
-    m_racerSpeed = 0;
+    setVerticalSpeed(-4);
+
 }
 
 BorderLine::~BorderLine()
@@ -131,10 +123,10 @@ BorderLine::~BorderLine()
 
 void BorderLine::doSomething()
 {
-    int v_speed = m_speed - m_racer->getSpeed();
-    int h_speed = 0;
+    GhostRacer* racer = getWorld()->getGhostRacer();
+    int v_speed = getVerticalSpeed() - racer->getVerticalSpeed();
     double new_y = getY() + v_speed;
-    double new_x = getX() + h_speed;
+    double new_x = getX();
     moveTo(new_x,new_y);
     if(getY() < 0 || getY() > VIEW_HEIGHT)
         setDead();
@@ -142,23 +134,33 @@ void BorderLine::doSomething()
 
 
 //YELLOW CLASS
-Yellow::Yellow(int x, int y, StudentWorld* world, GhostRacer* racer)
-: BorderLine(IID_YELLOW_BORDER_LINE,x,y,0,2.0,1,world,racer)
-{
-    m_hp = 1;
-    m_speed = -4;
-}
+Yellow::Yellow(double x, double y, StudentWorld* world)
+: BorderLine(IID_YELLOW_BORDER_LINE, x, y,world)
+{}
 
 Yellow::~Yellow() {}
 
 
 //WHITE CLASS
-White::White(int x, int y, StudentWorld* world, GhostRacer* racer)
-: BorderLine(IID_WHITE_BORDER_LINE, x, y, 0, 2.0, 1, world, racer)
-{
-    m_hp = 1;
-    m_speed = -4;
-}
+White::White(double x, double y, StudentWorld* world)
+: BorderLine(IID_WHITE_BORDER_LINE, x, y, world)
+{}
 
 White::~White() {};
+/*
+Spray::Spray(double x, double y, int dir, StudentWorld* world)
+: Actor(IID_HOLY_WATER_PROJECTILE, x, y, dir, 1.0, 1, world)
+{}
+
+Spray::~Spray() {}
+
+void Spray::doSomething()
+{
+    //Actor* other;
+    if(isDead())
+        return;
+    //TODO: IMPLEMENT P. 46 PSEUDOCODE
+    //if(isOverlap(other))
+}
+*/
 
