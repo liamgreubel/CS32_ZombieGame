@@ -41,12 +41,14 @@ public:
       // otherwise, return false, with the actor dead.
     //virtual bool moveRelativeToGhostRacerVerticalSpeed(double dx);
     
-    bool isOverlap(Actor* other);
+    bool hasActiveWater() {return m_waterActive;}
+    void setWater(bool val) {m_waterActive = val; }
     
 private:
     StudentWorld* m_world;
     bool m_isDead;
     double m_speed;
+    bool m_waterActive;
 };
 
 class BorderLine : public Actor
@@ -117,13 +119,15 @@ public:
     void increaseSprays(int amt) {m_waterSprays += amt;}
 
       // Spin as a result of hitting an oil slick.
-    //void spin();
+    void spin();
+   /* int getDirection() {return m_direction;}
+    void setDirection(int d) {m_direction = d;}*/
     
 private:
     int m_waterSprays;
-    bool m_waterActive;
+    int m_direction;
 };
-/*
+
 class Pedestrian : public Agent
 {
 public:
@@ -183,23 +187,23 @@ public:
 class GhostRacerActivatedObject : public Actor
 {
 public:
-    GhostRacerActivatedObject(int imageID, double x, double y, double size, int dir, StudentWorld* sw);
-    virtual bool beSprayedIfAppropriate();
+    GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, int depth, StudentWorld* sw);
+    //virtual bool beSprayedIfAppropriate();
 
       // Do the object's special activity (increase health, spin Ghostracer, etc.)
     virtual void doActivity(GhostRacer* gr) = 0;
 
       // Return the object's increase to the score when activated.
-    virtual int getScoreIncrease() const = 0;
+    //virtual int getScoreIncrease() const = 0;
 
       // Return the sound to be played when the object is activated.
-    virtual int getSound() const;
+    //virtual int getSound() const;
 
       // Return whether the object dies after activation.
-    virtual bool selfDestructs() const = 0;
+    //virtual bool selfDestructs() const = 0;
 
       // Return whether the object is affected by a holy water projectile.
-    virtual bool isSprayable() const = 0;
+    //virtual bool isSprayable() const = 0;
     
     virtual ~GhostRacerActivatedObject();
 };
@@ -210,10 +214,10 @@ public:
     OilSlick(double x, double y, StudentWorld* sw);
     virtual void doSomething();
     virtual void doActivity(GhostRacer* gr);
-    virtual int getScoreIncrease() const;
-    virtual int getSound() const;
-    virtual bool selfDestructs() const;
-    virtual bool isSprayable() const;
+    //virtual int getScoreIncrease() const;
+    virtual int getSound() const {return SOUND_OIL_SLICK;}
+    //virtual bool selfDestructs() const;
+    //virtual bool isSprayable() const;
     virtual ~OilSlick();
 };
 
@@ -253,7 +257,7 @@ public:
     virtual bool isSprayable() const;
     virtual ~SoulGoodie();
 };
-*/
+
 #endif // ACTOR_INCLUDED
 
 /*

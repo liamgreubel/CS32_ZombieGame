@@ -8,21 +8,11 @@
 
 //ACTOR CLASS
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
-: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0)
+: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0), m_waterActive(false)
 {}
 
 Actor::~Actor()
 {}
-
-bool Actor::isOverlap(Actor* other)
-{
-    double delta_x = abs(getX() - other->getX());
-    double delta_y = abs(getY() - other->getY());
-    double radius_sum = getRadius() + other->getRadius();
-    
-    return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
-}
-
 
 
 Agent::Agent(int imageID, double startX, double startY, int dir, double sz, int hp, StudentWorld* world)
@@ -33,7 +23,7 @@ Agent::~Agent() {}
 
 
 GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
-: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_waterActive(false)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10)
 {
     setVerticalSpeed(0);
 }
@@ -79,7 +69,8 @@ void GhostRacer::doSomething()
                     else
                         spray_x = getX();
                     //Spray* new_spray = new Spray(spray_x,getY() + SPRITE_HEIGHT,direction,getWorld());
-
+                    //make flag here to signal to StudentWorld that new spray needs to be added
+                    setWater(true);
                     getWorld()->playSound(SOUND_PLAYER_SPRAY);
                     increaseSprays(-1);
                 }
@@ -107,6 +98,24 @@ void GhostRacer::doSomething()
     double cur_x = getX();
     double cur_y = getY();
     moveTo(cur_x + delta_x, cur_y);
+}
+
+void GhostRacer::spin()
+{
+    int randDir;
+    int randClock = randInt(0,1);
+    randDir = (randClock == 0) ? (randDir = randInt(5,20)) : (randDir = randInt(-20,-5));//turn randomly in CW or CCW direction
+        //andDir = randInt(5,20);
+   // else    //turn randomly in counter-clockwise direction
+        //randDir = randInt(-20,-5);
+    
+    int new_dir = getDirection() + randDir;
+    if(new_dir < 60)
+        setDirection(60);
+    if(new_dir > 120)
+        setDirection(120);
+    else
+        setDirection(new_dir);
 }
 
 
@@ -147,7 +156,14 @@ White::White(double x, double y, StudentWorld* world)
 {}
 
 White::~White() {};
-/*
+
+
+
+
+
+
+
+
 Spray::Spray(double x, double y, int dir, StudentWorld* world)
 : Actor(IID_HOLY_WATER_PROJECTILE, x, y, dir, 1.0, 1, world)
 {}
@@ -160,7 +176,51 @@ void Spray::doSomething()
     if(isDead())
         return;
     //TODO: IMPLEMENT P. 46 PSEUDOCODE
+    //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
     //if(isOverlap(other))
 }
-*/
 
+
+GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, int depth, StudentWorld* world)
+: Actor(imageID, x, y, dir, size, depth, world)
+{
+    //setVerticalSpeed(-4);
+}
+
+GhostRacerActivatedObject::~GhostRacerActivatedObject() {}
+
+
+OilSlick::OilSlick(double x, double y, StudentWorld* world)
+: GhostRacerActivatedObject(IID_OIL_SLICK, x, y, 0, randInt(2,5), 1, world)
+{
+    setVerticalSpeed(-4);
+}
+
+OilSlick::~OilSlick() {}
+
+void OilSlick::doSomething()
+{
+    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    double new_y = getY() + vert_speed;
+    double new_x = getX();
+    moveTo(new_x,new_y);
+    if( (getX() < 0 || getX() > VIEW_WIDTH) || (getY() < 0 || getY() > VIEW_HEIGHT) )
+    {
+        setDead();
+        return;
+    }
+    doActivity(getWorld()->getGhostRacer());
+}
+
+void OilSlick::doActivity(GhostRacer* racer)
+{
+    double delta_x = abs(getX() - racer->getX());
+    double delta_y = abs(getY() - racer->getY());
+    double radius_sum = getRadius() + racer->getRadius();
+        
+    if( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) )
+    {
+        getWorld()->playSound(getSound());
+        racer->spin();
+    }
+}

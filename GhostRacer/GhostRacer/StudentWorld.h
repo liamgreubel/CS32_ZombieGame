@@ -40,6 +40,10 @@ public:
     GhostRacer* getOverlappingGhostRacer(Actor* a) const;
     void remove();
     void insert();
+    void setSpray();
+    int chanceOilSlick() {return fmax(150 - /*L*/ 5 * 10, 40);}
+    int oil() {return randInt(0,chanceOilSlick());}
+    
     
 private:
     std::vector<Actor*> m_vector;
