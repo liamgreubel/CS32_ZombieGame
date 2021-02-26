@@ -69,7 +69,7 @@ void GhostRacer::doSomething()
                     else
                         spray_x = getX();
                     //Spray* new_spray = new Spray(spray_x,getY() + SPRITE_HEIGHT,direction,getWorld());
-                    //make flag here to signal to StudentWorld that new spray needs to be added
+                    //TODO: make flag here to signal to StudentWorld that a new spray needs to be added
                     setWater(true);
                     getWorld()->playSound(SOUND_PLAYER_SPRAY);
                     increaseSprays(-1);
@@ -121,10 +121,9 @@ void GhostRacer::spin()
 
 //BORDERLINE CLASS
 BorderLine::BorderLine(int imageID, double startX, double startY, StudentWorld* world)
-: Actor(imageID, startX, startY, 0, 2.0, 1, world)
+: Actor(imageID, startX, startY, 0, 2.0, 2, world)
 {
     setVerticalSpeed(-4);
-
 }
 
 BorderLine::~BorderLine()
@@ -158,12 +157,6 @@ White::White(double x, double y, StudentWorld* world)
 White::~White() {};
 
 
-
-
-
-
-
-
 Spray::Spray(double x, double y, int dir, StudentWorld* world)
 : Actor(IID_HOLY_WATER_PROJECTILE, x, y, dir, 1.0, 1, world)
 {}
@@ -177,14 +170,17 @@ void Spray::doSomething()
         return;
     //TODO: IMPLEMENT P. 46 PSEUDOCODE
     //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
-    //if(isOverlap(other))
+    if(getWorld()->getGhostRacer()->hasActiveWater())
+    {
+        if(
+    }
 }
 
 
 GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, int depth, StudentWorld* world)
 : Actor(imageID, x, y, dir, size, depth, world)
 {
-    //setVerticalSpeed(-4);
+    setVerticalSpeed(-4);
 }
 
 GhostRacerActivatedObject::~GhostRacerActivatedObject() {}
@@ -192,9 +188,7 @@ GhostRacerActivatedObject::~GhostRacerActivatedObject() {}
 
 OilSlick::OilSlick(double x, double y, StudentWorld* world)
 : GhostRacerActivatedObject(IID_OIL_SLICK, x, y, 0, randInt(2,5), 1, world)
-{
-    setVerticalSpeed(-4);
-}
+{}
 
 OilSlick::~OilSlick() {}
 

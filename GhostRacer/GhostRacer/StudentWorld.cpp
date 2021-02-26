@@ -62,7 +62,13 @@ int StudentWorld::move()
         {
             m_vector.at(i)->doSomething();
             if(m_racer->hasActiveWater())
+            {
                 setSpray();//TODO: ONLY INITIALIZATION IMPLEMENTED - ADD MOVEMENT
+                for(int j = 0; j < m_vector.size(); j++)
+                {
+                    if(
+                }
+            }
             
         }
     }//end for loop
@@ -151,7 +157,6 @@ void StudentWorld::setSpray()
         }
         if(direction < 90)
         {
-            
             spray_x = m_racer->getX() + m_racer->getRadius() * cos( ((m_racer->getDirection()) * M_PI / 180) );
             spray_y = m_racer->getY() + m_racer->getRadius() * sin( (m_racer->getDirection() * M_PI / 180) );
         }
