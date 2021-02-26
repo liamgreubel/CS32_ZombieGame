@@ -45,6 +45,7 @@ public:
     int oil() {return randInt(0,chanceOilSlick());}
     
     
+    
 private:
     std::vector<Actor*> m_vector;
     GhostRacer* m_racer;

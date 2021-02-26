@@ -42,13 +42,24 @@ public:
     //virtual bool moveRelativeToGhostRacerVerticalSpeed(double dx);
     
     bool hasActiveWater() {return m_waterActive;}
+    
     void setWater(bool val) {m_waterActive = val; }
+    
+    bool isOffScreen() {return (getX() < 0 || getX() > VIEW_WIDTH) || (getY() < 0 || getY() > VIEW_HEIGHT);}
+    
+    bool isOverlap(Actor* racer);
+    
+    int getScore() {return m_score;}
+    
+    void changeScore(int n) {m_score += n;}
+    
     
 private:
     StudentWorld* m_world;
     bool m_isDead;
     double m_speed;
     bool m_waterActive;
+    int m_score;
 };
 
 class BorderLine : public Actor
@@ -122,12 +133,14 @@ public:
 
       // Spin as a result of hitting an oil slick.
     void spin();
-   /* int getDirection() {return m_direction;}
-    void setDirection(int d) {m_direction = d;}*/
+    
+    int getSouls() {return m_souls;}
+    
+    void incSouls() {m_souls++;}
     
 private:
     int m_waterSprays;
-    int m_direction;
+    int m_souls;
 };
 
 class Pedestrian : public Agent
@@ -189,9 +202,10 @@ public:
 class GhostRacerActivatedObject : public Actor
 {
 public:
-    GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, int depth, StudentWorld* sw);
+    GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, StudentWorld* sw);
+    virtual void doSomething();
     //virtual bool beSprayedIfAppropriate();
-
+    
       // Do the object's special activity (increase health, spin Ghostracer, etc.)
     virtual void doActivity(GhostRacer* gr) = 0;
 
@@ -199,7 +213,7 @@ public:
     //virtual int getScoreIncrease() const = 0;
 
       // Return the sound to be played when the object is activated.
-    //virtual int getSound() const;
+    virtual int getSound() const {return SOUND_GOT_GOODIE;}
 
       // Return whether the object dies after activation.
     //virtual bool selfDestructs() const = 0;
@@ -227,11 +241,11 @@ class HealingGoodie : public GhostRacerActivatedObject
 {
 public:
     HealingGoodie(double x, double y, StudentWorld* sw);
-    virtual void doSomething();
+    //virtual void doSomething();
     virtual void doActivity(GhostRacer* gr);
-    virtual int getScoreIncrease() const;
-    virtual bool selfDestructs() const;
-    virtual bool isSprayable() const;
+    //virtual int getScoreIncrease() const {return 250;}
+    //virtual bool selfDestructs() const;
+    //virtual bool isSprayable() const;
     virtual ~HealingGoodie();
 };
 
@@ -239,11 +253,11 @@ class HolyWaterGoodie : public GhostRacerActivatedObject
 {
 public:
     HolyWaterGoodie(double x, double y, StudentWorld* sw);
-    virtual void doSomething();
+    //virtual void doSomething();
     virtual void doActivity(GhostRacer* gr);
-    virtual int getScoreIncrease() const;
-    virtual bool selfDestructs() const;
-    virtual bool isSprayable() const;
+    //virtual int getScoreIncrease() const;
+    //virtual bool selfDestructs() const;
+    //virtual bool isSprayable() const;
     virtual ~HolyWaterGoodie();
 };
 
@@ -254,7 +268,7 @@ public:
     virtual void doSomething();
     virtual void doActivity(GhostRacer* gr);
     virtual int getScoreIncrease() const;
-    virtual int getSound() const;
+    virtual int getSound() const {return SOUND_GOT_SOUL;}
     virtual bool selfDestructs() const;
     virtual bool isSprayable() const;
     virtual ~SoulGoodie();

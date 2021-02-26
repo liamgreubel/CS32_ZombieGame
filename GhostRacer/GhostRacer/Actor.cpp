@@ -8,12 +8,21 @@
 
 //ACTOR CLASS
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
-: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0), m_waterActive(false)
+: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0), m_waterActive(false), m_score(0000)
 {}
+
 
 Actor::~Actor()
 {}
 
+bool Actor::isOverlap(Actor* racer)
+{
+    double delta_x = abs(getX() - racer->getX());
+    double delta_y = abs(getY() - racer->getY());
+    double radius_sum = getRadius() + racer->getRadius();
+            
+    return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
+}
 
 Agent::Agent(int imageID, double startX, double startY, int dir, double sz, int hp, StudentWorld* world)
 : Actor(imageID, startX, startY, dir, sz, 0, world), m_hp(hp)
@@ -23,7 +32,7 @@ Agent::~Agent() {}
 
 
 GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
-: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0)
 {
     setVerticalSpeed(0);
 }
@@ -172,22 +181,41 @@ void Spray::doSomething()
     //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
     if(getWorld()->getGhostRacer()->hasActiveWater())
     {
-        if(
+        //if(
     }
 }
 
 
-GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, int depth, StudentWorld* world)
-: Actor(imageID, x, y, dir, size, depth, world)
+GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, StudentWorld* world)
+: Actor(imageID, x, y, dir, size, 2, world)
 {
     setVerticalSpeed(-4);
 }
 
 GhostRacerActivatedObject::~GhostRacerActivatedObject() {}
 
+void GhostRacerActivatedObject::doSomething()
+{
+    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    double new_y = getY() + vert_speed;
+    double new_x = getX();
+    moveTo(new_x,new_y);
+    if( isOffScreen() )
+    {
+        setDead();
+        return;
+    }
+    if(isOverlap(getWorld()->getGhostRacer()))
+    {
+        getWorld()->playSound(getSound());
+        doActivity(getWorld()->getGhostRacer());
+        setDead();
+    }
+}
+
 
 OilSlick::OilSlick(double x, double y, StudentWorld* world)
-: GhostRacerActivatedObject(IID_OIL_SLICK, x, y, 0, randInt(2,5), 1, world)
+: GhostRacerActivatedObject(IID_OIL_SLICK, x, y, 0, randInt(2,5),world)
 {}
 
 OilSlick::~OilSlick() {}
@@ -217,4 +245,34 @@ void OilSlick::doActivity(GhostRacer* racer)
         getWorld()->playSound(getSound());
         racer->spin();
     }
+}
+
+HealingGoodie::HealingGoodie(double x, double y, StudentWorld* world)
+: GhostRacerActivatedObject(IID_HEAL_GOODIE, x, y, 0, 1.0, world)
+{
+    
+}
+
+HealingGoodie::~HealingGoodie() {}
+
+
+
+void HealingGoodie::doActivity(GhostRacer *racer)
+{
+    racer->changeHP(10);
+    racer->changeScore(250);
+}
+
+HolyWaterGoodie::HolyWaterGoodie(double x, double y, StudentWorld* world)
+: GhostRacerActivatedObject(IID_HOLY_WATER_GOODIE, x, y, 90, 2.0, world)
+{
+}
+
+HolyWaterGoodie::~HolyWaterGoodie() {}
+
+
+void HolyWaterGoodie::doActivity(GhostRacer *racer)
+{
+    racer->increaseSprays(10);
+    racer->changeScore(50);
 }

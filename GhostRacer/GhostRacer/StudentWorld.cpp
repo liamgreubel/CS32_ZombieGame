@@ -44,17 +44,22 @@ int StudentWorld::init()
         m_vector.push_back(right);
     }
     y = m_vector.back()->getY();
+    
 
     return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move()
 {
-    setGameStatText("Score: 0000  Lvl: 1  Souls2Save: 5  Lives: 3  Health: " + to_string(m_racer->getHP()) + "  Sprays: " + to_string(m_racer->getNumSprays()) + "  Bonus: 4321");
+    setGameStatText("Score: " + to_string(m_racer->getScore())  + "  Lvl: 1  Souls2Save: 5  Lives: 3  Health: " + to_string(m_racer->getHP()) + "  Sprays: " + to_string(m_racer->getNumSprays()) + "  Bonus: 4321");
     if(oil() == 0)
     {
         OilSlick* rand_oil = new OilSlick(randInt(LEFT_EDGE,RIGHT_EDGE), randInt(0, VIEW_HEIGHT), this);
         m_vector.push_back(rand_oil);
+        HealingGoodie* heal = new HealingGoodie(150,250,this);
+        m_vector.push_back(heal);
+        HolyWaterGoodie* water = new HolyWaterGoodie(50,250,this);
+        m_vector.push_back(water);
     }
     for(int i = 0 ; i < m_vector.size(); i++)
     {
@@ -64,11 +69,12 @@ int StudentWorld::move()
             if(m_racer->hasActiveWater())
             {
                 setSpray();//TODO: ONLY INITIALIZATION IMPLEMENTED - ADD MOVEMENT
-                for(int j = 0; j < m_vector.size(); j++)
+                /*for(int j = 0; j < m_vector.size(); j++)
                 {
-                    if(
-                }
+                    if()
+                }*/
             }
+            
             
         }
     }//end for loop
