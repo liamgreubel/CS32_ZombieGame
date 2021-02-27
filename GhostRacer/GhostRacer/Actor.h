@@ -60,6 +60,12 @@ public:
     
     virtual bool isHuman() const {return false;}
     
+    virtual bool canDrive() const {return false;}
+    
+    virtual int checkLane(Actor* a);
+    
+    int getLane();
+    
 private:
     StudentWorld* m_world;
     bool m_isDead;
@@ -118,7 +124,7 @@ public:
       // What sound should play when this agent is damaged and dies?
     virtual int soundWhenDie() const = 0;
     
-    virtual bool beSprayedIfAppropriate() {return true;}
+    //virtual bool beSprayedIfAppropriate() = 0;
     
 private:
     int m_hp;
@@ -159,12 +165,17 @@ public:
     
     bool lostLife() {return m_lostLife;}
     void setState(bool val)  {m_lostLife = val;}
+    
+    void setShot(bool val) {m_shotWater = val; }
+    
+    bool hasShot() {return m_shotWater;}
 private:
     int m_waterSprays;
     int m_souls;
     bool m_waterActive;
     int m_lives;
     bool m_lostLife;
+    bool m_shotWater;
 };
 
 class Pedestrian : public Agent
@@ -176,7 +187,7 @@ public:
     virtual ~Pedestrian();
 
       // Get the pedestrian's horizontal speed
-    int getHorizSpeed() const {return m_hSpeed;}
+    double getHorizSpeed() const {return m_hSpeed;}
 
       // Set the pedestrian's horizontal speed
     void setHorizSpeed(int s) {m_hSpeed = s;}
@@ -188,7 +199,7 @@ public:
     void setPlan(int n) {m_plan = n;}
     int  getPlan() {return m_plan;}
 private:
-    int m_hSpeed;
+    double m_hSpeed;
     int m_plan;
 };
 
@@ -197,7 +208,7 @@ class HumanPedestrian : public Pedestrian
 public:
     HumanPedestrian(double x, double y, StudentWorld* sw);
     virtual void doSomething();
-    //virtual bool beSprayedIfAppropriate();
+    virtual bool beSprayedIfAppropriate();
     //virtual bool takeDamageAndPossiblyDie(int hp);
     virtual ~HumanPedestrian();
     virtual bool isHuman() const {return true;}
@@ -210,7 +221,7 @@ class ZombiePedestrian : public Pedestrian
 public:
     ZombiePedestrian(double x, double y, StudentWorld* sw);
     virtual void doSomething();
-    //virtual bool beSprayedIfAppropriate();
+    virtual bool beSprayedIfAppropriate();
     virtual ~ZombiePedestrian();
 private:
     int m_ticksGrunt;
@@ -221,9 +232,14 @@ class ZombieCab : public Agent
 public:
     ZombieCab(double x, double y, StudentWorld* sw);
     virtual void doSomething();
-    virtual bool beSprayedIfAppropriate();
+    //virtual bool beSprayedIfAppropriate();
     virtual ~ZombieCab();
     virtual int soundWhenDie() const {return SOUND_VEHICLE_DIE;}
+    
+    virtual bool canDrive() const {return true;}
+private:
+    int m_plan;
+    bool m_hasDamaged;
 };
 
 class Spray : public Actor

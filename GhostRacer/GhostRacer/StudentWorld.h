@@ -44,7 +44,7 @@ public:
     int chanceBottleRefill();
     int chanceSoul();
     void chanceAddActors();
-    //int chanceHeal();
+    bool hasCollInLane(Actor* a);
     
 private:
     std::vector<Actor*> m_vector;
@@ -55,6 +55,7 @@ private:
     int m_score;
     int m_tempScore;
     int m_runningScore;
+    bool m_occupiedLanes[3];
 };
 
 #endif

@@ -7,10 +7,11 @@ using namespace std;
 
 const int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
 const int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
-const int N = VIEW_HEIGHT / SPRITE_HEIGHT;
-const int M = VIEW_HEIGHT / (4 * SPRITE_HEIGHT);
 const int left_middle = LEFT_EDGE + (ROAD_WIDTH / 3);
 const int right_middle = RIGHT_EDGE - (ROAD_WIDTH / 3);
+const int N = VIEW_HEIGHT / SPRITE_HEIGHT;
+const int M = VIEW_HEIGHT / (4 * SPRITE_HEIGHT);
+
 
 GameWorld* createStudentWorld(string assetPath)
 {
@@ -71,18 +72,36 @@ int StudentWorld::move()
         if(!m_vector.at(i)->isDead())
         {
             m_vector.at(i)->doSomething();
-            if(m_racer->hasActiveWater())
+            if(m_racer->hasShot())
             {
                 setSpray();//TODO: ONLY INITIALIZATION IMPLEMENTED - ADD MOVEMENT
-                /*for(int j = 0; j < m_vector.size(); j++)
-                {
-                    if()
-                }*/
             }
-            if(m_racer->lostLife())
+            /*if(m_racer->lostLife())
             {
                 
+            }*/
+            if( (!m_vector.at(i)->isDead()) && (m_vector.at(i)->isCollisionAvoidanceWorthy()) )
+            {
+                int q = m_vector.at(i)->getLane();
+                switch(q)
+                {
+                    case 1:
+                        m_occupiedLanes[0] = true;
+                        break;
+                    case 2:
+                        m_occupiedLanes[1] = true;
+                        break;
+                    case 3:
+                        m_occupiedLanes[2] = true;
+                        break;
+                    default:
+                        break;
+                }
             }
+            /*if(m_vector.at(i)->canDrive())//if cab
+            {
+                
+            }*/
             
         }
     }//end for loop
@@ -103,6 +122,7 @@ int StudentWorld::move()
     {
         decLives();
         m_racer->setLife(m_racer->getLife()-1);
+        playSound(SOUND_PLAYER_DIE);
         m_tempScore = m_score;
         m_bonus = 5000;
         return GWSTATUS_PLAYER_DIED;
@@ -179,29 +199,27 @@ void StudentWorld::insert()
 
 void StudentWorld::setSpray()
 {
-    if(m_racer->hasActiveWater())
+    int direction = m_racer->getDirection();
+    double spray_x, spray_y;
+    if(direction > 90)
     {
-        int direction = m_racer->getDirection();
-        double spray_x, spray_y;
-        if(direction > 90)
-        {
-            spray_x = (m_racer->getX() + m_racer->getRadius()) * cos( (m_racer->getDirection() * M_PI / 180) );
-            spray_y = (m_racer->getY() + m_racer->getRadius()) * sin( (m_racer->getDirection() * M_PI / 180) );
-        }
-        if(direction < 90)
-        {
-            spray_x = m_racer->getX() + m_racer->getRadius() * cos( ((m_racer->getDirection()) * M_PI / 180) );
-            spray_y = m_racer->getY() + m_racer->getRadius() * sin( (m_racer->getDirection() * M_PI / 180) );
-        }
-        else
-        {
-            spray_x = m_racer->getX();
-            spray_y = m_racer->getY() + m_racer->getRadius() + SPRITE_HEIGHT;
-        }
-        Spray* new_spray = new Spray(spray_x,spray_y,direction,this);
-        m_vector.push_back(new_spray);
+        spray_x = (m_racer->getX() + m_racer->getRadius()) * cos( (m_racer->getDirection() * M_PI / 180) );
+        spray_y = (m_racer->getY() + m_racer->getRadius()) * sin( (m_racer->getDirection() * M_PI / 180) );
     }
-    m_racer->setWater(false);
+    if(direction < 90)
+    {
+        spray_x = m_racer->getX() + m_racer->getRadius() * cos( ((m_racer->getDirection()) * M_PI / 180) );
+        spray_y = m_racer->getY() + m_racer->getRadius() * sin( (m_racer->getDirection() * M_PI / 180) );
+    }
+    else
+    {
+        spray_x = m_racer->getX();
+        spray_y = m_racer->getY() + m_racer->getRadius() + SPRITE_HEIGHT;
+    }
+    Spray* new_spray = new Spray(spray_x,spray_y,direction,this);
+    m_vector.push_back(new_spray);
+    m_racer->setShot(false);
+    m_racer->setWater(true);
 }
 
 
@@ -254,3 +272,19 @@ void StudentWorld::chanceAddActors()
         m_vector.push_back(soul);
     }
 }
+
+bool StudentWorld::sprayFirstAppropriateActor(Actor* a)
+{
+    vector<Actor*>::iterator it = m_vector.begin();
+    for(; it != m_vector.end(); it++)
+    {
+        if((!(*it)->isDead()) && overlaps(*it,a) && (*it)->beSprayedIfAppropriate())
+            return true;
+    }
+    return false;
+}
+
+/*bool StudentWorld::hasCollInLane(Actor* a)
+{
+    int lane /* = checkLane();
+}*/

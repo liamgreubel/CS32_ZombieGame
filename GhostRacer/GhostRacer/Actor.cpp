@@ -5,6 +5,10 @@
 
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 
+const int LEFT_EDGE = ROAD_CENTER - ROAD_WIDTH/2;
+const int RIGHT_EDGE = ROAD_CENTER + ROAD_WIDTH/2;
+const int left_middle = LEFT_EDGE + (ROAD_WIDTH / 3);
+const int right_middle = RIGHT_EDGE - (ROAD_WIDTH / 3);
 
 //ACTOR CLASS
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
@@ -36,6 +40,37 @@ void Actor::movement()
         setDead();
 }
 
+int Actor::checkLane(Actor* a)  //returns lane with corresponding actors. if no lane nor are collisionAvoidance, then returns 0
+{
+    if(a->isCollisionAvoidanceWorthy())
+    {
+        //return whichLane(this,a);
+        
+    }
+    else
+    {
+        return 0;
+    }
+    return 0;
+}
+
+int Actor::getLane()//determine which lane an actor is in
+{
+    const int NO_LANE = 0;  //actors aren't in the same lane on the road
+    const int LEFT_LANE = 1;
+    const int MIDDLE_LANE = 2;
+    const int RIGHT_LANE = 3;
+    if(getX() > LEFT_EDGE && getX() < left_middle)
+        return LEFT_LANE;
+    else if(getX() > left_middle && getX() < right_middle)
+        return MIDDLE_LANE;
+    else if(getX() > right_middle && getX() < RIGHT_EDGE)
+        return RIGHT_LANE;
+    else
+        return NO_LANE;
+}
+
+
 
 Agent::Agent(int imageID, double startX, double startY, int dir, double sz, int hp, StudentWorld* world)
 : Actor(imageID, startX, startY, dir, sz, 0, world), m_hp(hp)
@@ -45,7 +80,7 @@ Agent::~Agent() {}
 
 
 GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
-: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false), m_lives(3), m_lostLife(false)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false), m_lives(3), m_lostLife(false), m_shotWater(false)
 {
     setVerticalSpeed(0);
     setHorizSpeed(0);
@@ -93,7 +128,8 @@ void GhostRacer::doSomething()
                         spray_x = getX();
                     //Spray* new_spray = new Spray(spray_x,getY() + SPRITE_HEIGHT,direction,getWorld());
                     //TODO: make flag here to signal to StudentWorld that a new spray needs to be added
-                    setWater(true);
+                    //setWater(true);
+                    setShot(true);
                     getWorld()->playSound(SOUND_PLAYER_SPRAY);
                     increaseSprays(-1);
                 }
@@ -144,6 +180,11 @@ void GhostRacer::spin()
     else
         setDirection(CW);
 }
+
+/*bool GhostRacer::hasActiveWater()
+{
+    return getWorld()->sprayFirstAppropriateActor(Actor *a)
+}*/
 
 
 Pedestrian::Pedestrian(int imageID, double x, double y, double size, StudentWorld* world)
@@ -242,6 +283,14 @@ void HumanPedestrian::doSomething()
     }
 }
 
+bool HumanPedestrian::beSprayedIfAppropriate()
+{
+    setHorizSpeed(getHorizSpeed() * -1);
+    int new_dir = (getDirection() == 0) ? 180 : 0;  //change direction
+    setDirection(new_dir);
+    return true;
+}
+
 
 ZombiePedestrian::ZombiePedestrian(double x, double y, StudentWorld* sw)
 : Pedestrian(IID_ZOMBIE_PED, x, y, 3.0, sw), m_ticksGrunt(0)
@@ -282,7 +331,55 @@ void ZombiePedestrian::doSomething()
     
 }
 
+bool ZombiePedestrian::beSprayedIfAppropriate()
+{
+    changeHP(-1);
+    return true;
+}
 
+ZombieCab::ZombieCab(double x, double y, StudentWorld* sw)
+: Agent(IID_ZOMBIE_CAB, x, y, 90, 4.0, 3, sw), m_plan(0), m_hasDamaged(false)
+{
+    setVerticalSpeed(0);
+    setHorizSpeed(0);
+}
+
+ZombieCab::~ZombieCab() {}
+
+void ZombieCab::doSomething()
+{
+    if(isDead())
+        return;
+    GhostRacer* racer = getWorld()->getGhostRacer();
+    if(isOverlap(racer))
+    {
+        if(!m_hasDamaged)   //step 2.b
+        {
+            getWorld()->playSound(SOUND_VEHICLE_CRASH);
+            racer->changeHP(-20);
+            if(getX() <= racer->getX()) //step 2.e
+            {
+                setHorizSpeed(-5);
+                int new_dir = 120 + randInt(0, 19);
+                setDirection(new_dir);
+            }
+            if(getX() > racer->getX())  //step 2.f
+            {
+                setHorizSpeed(-5);
+                int new_dir = 60 - randInt(0, 19);
+                setDirection(new_dir);
+            }
+            m_hasDamaged = true;    //2.g
+        }
+    }
+    else
+    {
+        movement();//keep???    //step 3
+        if(isDead())
+            return;
+    }
+    //if(getVerticalSpeed() > racer->getVerticalSpeed() && checkLane())
+}
 
 //BORDERLINE CLASS
 BorderLine::BorderLine(int imageID, double startX, double startY, StudentWorld* world)
@@ -337,7 +434,28 @@ void Spray::doSomething()
         return;
     //TODO: IMPLEMENT P. 46 PSEUDOCODE
     //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
-    if(getWorld()->getGhostRacer()->hasActiveWater())
+    if(getWorld()->sprayFirstAppropriateActor(this))
+    {
+        setDead();
+        return;
+    }
+    else
+    {
+        moveForward(SPRITE_HEIGHT);
+        m_pixelsMoved += SPRITE_HEIGHT;
+        if(isOffScreen() || m_pixelsMoved == 160)
+        {
+            setDead();
+            m_pixelsMoved = 0;
+            getWorld()->getGhostRacer()->setWater(false);
+        }
+        
+    }
+    
+    
+    
+    
+    /*if(getWorld()->getGhostRacer()->hasActiveWater())
     {
         //hasOverlapped();
         moveForward(SPRITE_HEIGHT);
@@ -352,7 +470,8 @@ void Spray::doSomething()
             setDead();
             getWorld()->getGhostRacer()->setWater(false);
         }
-    }
+    }*/
+    
 }
 
 void Spray::hasOverlapped(/*Actor* other*/)
