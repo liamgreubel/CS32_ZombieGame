@@ -41,10 +41,6 @@ public:
       // otherwise, return false, with the actor dead.
     //virtual bool moveRelativeToGhostRacerVerticalSpeed(double dx);
     
-    bool hasActiveWater() {return m_waterActive;}
-    
-    void setWater(bool val) {m_waterActive = val; }
-    
     bool isOffScreen() {return (getX() < 0 || getX() > VIEW_WIDTH) || (getY() < 0 || getY() > VIEW_HEIGHT);}
     
     bool isOverlap(Actor* racer);
@@ -64,7 +60,6 @@ private:
     StudentWorld* m_world;
     bool m_isDead;
     double m_speed;
-    bool m_waterActive;
     int m_score;
 };
 
@@ -135,6 +130,8 @@ public:
 
       // How many holy water projectiles does the object have?
     int getNumSprays() const {return m_waterSprays;}
+    
+    void setSprays(int n) {m_waterSprays = n;}
 
       // Increase the number of holy water projectiles the object has.
     void increaseSprays(int amt) {m_waterSprays += amt;}
@@ -148,34 +145,41 @@ public:
     
     void setSouls(int n) {m_souls = n;}
     
+    void setWater(bool val) {m_waterActive = val; }
+    
+    bool hasActiveWater() {return m_waterActive;}
+    
 private:
     int m_waterSprays;
     int m_souls;
+    bool m_waterActive;
 };
 
 class Pedestrian : public Agent
 {
 public:
-    Pedestrian(StudentWorld* sw, int imageID, double x, double y, double size);
-    virtual int soundWhenHurt() const;
+    Pedestrian(int imageID, double x, double y, double size, StudentWorld* sw);
+    virtual int soundWhenHurt() const {return SOUND_PED_HURT;}
     virtual int soundWhenDie() const {return SOUND_PED_DIE;}
     virtual ~Pedestrian();
 
       // Get the pedestrian's horizontal speed
-    //int getHorizSpeed() const;
+    int getHorizSpeed() const {return m_hSpeed;}
 
       // Set the pedestrian's horizontal speed
-    //void setHorizSpeed(int s);
+    void setHorizSpeed(int s) {m_hSpeed = s;}
 
       // Move the pedestrian.  If the pedestrian doesn't go off screen and
       // should pick a new movement plan, pick a new plan.
-    //void moveAndPossiblyPickPlan();
+    void moveAndPossiblyPickPlan();
+private:
+    int m_hSpeed;
 };
 
 class HumanPedestrian : public Pedestrian
 {
 public:
-    HumanPedestrian(StudentWorld* sw, double x, double y);
+    HumanPedestrian(double x, double y, StudentWorld* sw);
     virtual void doSomething();
     virtual bool beSprayedIfAppropriate();
     virtual bool takeDamageAndPossiblyDie(int hp);
@@ -187,7 +191,7 @@ public:
 class ZombiePedestrian : public Pedestrian
 {
 public:
-    ZombiePedestrian(StudentWorld* sw, double x, double y);
+    ZombiePedestrian(double x, double y, StudentWorld* sw);
     virtual void doSomething();
     virtual bool beSprayedIfAppropriate();
     virtual ~ZombiePedestrian();
@@ -196,7 +200,7 @@ public:
 class ZombieCab : public Agent
 {
 public:
-    ZombieCab(StudentWorld* sw, double x, double y);
+    ZombieCab(double x, double y, StudentWorld* sw);
     virtual void doSomething();
     virtual bool beSprayedIfAppropriate();
     virtual ~ZombieCab();
@@ -208,7 +212,7 @@ class Spray : public Actor
 public:
     Spray(double x, double y, int dir, StudentWorld* sw);
     virtual void doSomething();
-    void hasOverlapped(Actor* other);
+    void hasOverlapped(/*Actor* other*/);
     virtual ~Spray();
 private:
     int m_pixelsMoved;

@@ -24,9 +24,6 @@ public:
       // Add an actor to the world.
     void addActor(Actor* a);
 
-      // Record that a soul was saved.
-    void recordSoulSaved();
-
       // If actor a overlaps some live actor that is affected by a holy water
       // projectile, inflict a holy water spray on that actor and return true;
       // otherwise, return false.  (See Actor::beSprayedIfAppropriate.)

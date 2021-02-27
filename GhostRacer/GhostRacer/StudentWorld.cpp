@@ -48,7 +48,7 @@ int StudentWorld::init()
     m_numSouls = 2 * getLevel() + 5;
     m_bonus = 5000;
     m_racer->setSouls(0);
-    m_racer->setSp
+    m_racer->setSprays(10);
     //m_score = (getLevel() == 3) ? 0 : m_racer->getScore();
     if(getLevel() == 1)
         m_score = 0;
@@ -186,7 +186,7 @@ void StudentWorld::setSpray()
         else
         {
             spray_x = m_racer->getX();
-            spray_y =m_racer->getY() + m_racer->getRadius() + SPRITE_HEIGHT;
+            spray_y = m_racer->getY() + m_racer->getRadius() + SPRITE_HEIGHT;
         }
         Spray* new_spray = new Spray(spray_x,spray_y,direction,this);
         m_vector.push_back(new_spray);

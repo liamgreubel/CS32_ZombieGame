@@ -8,7 +8,7 @@
 
 //ACTOR CLASS
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
-: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0), m_waterActive(false), m_score(0000)
+: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0), m_score(0000)
 {}
 
 
@@ -32,7 +32,7 @@ Agent::~Agent() {}
 
 
 GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
-: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false)
 {
     setVerticalSpeed(0);
 }
@@ -125,6 +125,37 @@ void GhostRacer::spin()
 }
 
 
+Pedestrian::Pedestrian(int imageID, double x, double y, double size, StudentWorld* world)
+: Agent(imageID, x, y, 0, size, 2, world), m_hSpeed(0)
+{
+    setVerticalSpeed(-4);
+}
+
+Pedestrian::~Pedestrian() {}
+
+void Pedestrian::moveAndPossiblyPickPlan()
+{
+    int vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    int horiz_speed = getHorizSpeed();
+    double new_y = getY() + vert_speed;
+    double new_x = getX() + horiz_speed;
+    moveTo(new_x, new_y);
+    if(isOffScreen())
+    {
+        setDead();
+        return;
+    }
+}
+
+
+HumanPedestrian::HumanPedestrian(double x, double y, StudentWorld* sw)
+: Pedestrian(IID_HUMAN_PED, x, y, 2.0, sw)
+{
+    
+}
+
+
+
 //BORDERLINE CLASS
 BorderLine::BorderLine(int imageID, double startX, double startY, StudentWorld* world)
 : Actor(imageID, startX, startY, 0, 2.0, 2, world)
@@ -178,13 +209,25 @@ void Spray::doSomething()
     //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
     if(getWorld()->getGhostRacer()->hasActiveWater())
     {
-        //isOverlap();
+        //hasOverlapped();
+        moveForward(SPRITE_HEIGHT);
+        m_pixelsMoved += 8;
+        if(isOffScreen())
+        {
+            setDead();
+            return;
+        }
+        if(m_pixelsMoved == 160)
+        {
+            setDead();
+            getWorld()->getGhostRacer()->setWater(false);
+        }
     }
 }
 
-void Spray::hasOverlapped(Actor* other)
+void Spray::hasOverlapped(/*Actor* other*/)
 {
-    if(isOverlap(other) && other->beSprayedIfAppropriate())
+    if(/*isOverlap(other) && other->beSprayedIfAppropriate()*/1 == 0)
     {
         /*if(other->isHuman())
             //REVERSE DIRECTION
@@ -193,7 +236,7 @@ void Spray::hasOverlapped(Actor* other)
          setDead();
          return;
          */
-        
+        return;
     }
     else
     {
@@ -206,7 +249,10 @@ void Spray::hasOverlapped(Actor* other)
         return;
     }
     if(m_pixelsMoved == 160)
+    {
         setDead();
+        getWorld()->getGhostRacer()->setWater(false);
+    }
 }
 
 
