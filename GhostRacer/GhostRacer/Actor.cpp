@@ -32,7 +32,7 @@ Agent::~Agent() {}
 
 
 GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
-: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false), m_lives(3), m_lostLife(false)
 {
     setVerticalSpeed(0);
 }
@@ -126,7 +126,7 @@ void GhostRacer::spin()
 
 
 Pedestrian::Pedestrian(int imageID, double x, double y, double size, StudentWorld* world)
-: Agent(imageID, x, y, 0, size, 2, world), m_hSpeed(0)
+: Agent(imageID, x, y, 0, size, 2, world), m_hSpeed(0), m_plan(0)
 {
     setVerticalSpeed(-4);
 }
@@ -145,12 +145,88 @@ void Pedestrian::moveAndPossiblyPickPlan()
         setDead();
         return;
     }
+    if(isHuman())
+    {
+        incPlan(-1);
+        if(getPlan() > 0)
+            return;
+    }
+    else
+    {
+        if(getPlan()  > 0)
+        {
+            incPlan(-1);
+            return;
+        }
+    }
+    while(getHorizSpeed() != 0)
+    {
+        setHorizSpeed(randInt(-3,3));
+    }
+    setPlan(randInt(4,32));
+    if(getHorizSpeed() < 0)
+        setDirection(180);
+    else
+        setDirection(0);
 }
 
 
 HumanPedestrian::HumanPedestrian(double x, double y, StudentWorld* sw)
 : Pedestrian(IID_HUMAN_PED, x, y, 2.0, sw)
+{}
+
+HumanPedestrian::~HumanPedestrian() {}
+
+void HumanPedestrian::doSomething()
 {
+    if(isDead())
+        return;
+    GhostRacer* racer = getWorld()->getGhostRacer();
+    if(isOverlap(racer))
+    {
+        racer->setHP(0);
+        return;
+    }
+    moveAndPossiblyPickPlan();
+    if(isDead())
+        return;
+}
+
+
+ZombiePedestrian::ZombiePedestrian(double x, double y, StudentWorld* sw)
+: Pedestrian(IID_ZOMBIE_PED, x, y, 3.0, sw), m_ticksGrunt(0)
+{}
+
+ZombiePedestrian::~ZombiePedestrian() {}
+
+void ZombiePedestrian::doSomething()
+{
+    if(isDead())
+        return;
+    GhostRacer* racer = getWorld()->getGhostRacer();
+    if(isOverlap(racer))
+    {
+        racer->changeHP(-5);
+        changeHP(-2);
+        return;
+    }
+    if(abs(getX() - racer->getX()) <= 30 && getY() - racer->getY() > 0)
+    {
+        setDirection(270);
+        if(getX() - racer->getX() < 0)
+            setHorizSpeed(1);
+        else if (getX() - racer->getX() > 0)
+            setHorizSpeed(-1);
+        else
+            setHorizSpeed(0);
+        m_ticksGrunt--;
+        if(m_ticksGrunt <= 0)
+        {
+            getWorld()->playSound(SOUND_ZOMBIE_ATTACK);
+            m_ticksGrunt = 20;
+        }
+    }
+    moveAndPossiblyPickPlan();
     
 }
 

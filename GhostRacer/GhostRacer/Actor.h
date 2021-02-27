@@ -149,10 +149,17 @@ public:
     
     bool hasActiveWater() {return m_waterActive;}
     
+    int getLife() {return m_lives;}
+    void setLife(int val) {m_lives = val;}
+    
+    bool lostLife() {return m_lostLife;}
+    void setState(bool val)  {m_lostLife = val;}
 private:
     int m_waterSprays;
     int m_souls;
     bool m_waterActive;
+    int m_lives;
+    bool m_lostLife;
 };
 
 class Pedestrian : public Agent
@@ -172,8 +179,12 @@ public:
       // Move the pedestrian.  If the pedestrian doesn't go off screen and
       // should pick a new movement plan, pick a new plan.
     void moveAndPossiblyPickPlan();
+    void incPlan(int n) {m_plan += n;}
+    void setPlan(int n) {m_plan = n;}
+    int  getPlan() {return m_plan;}
 private:
     int m_hSpeed;
+    int m_plan;
 };
 
 class HumanPedestrian : public Pedestrian
@@ -182,10 +193,11 @@ public:
     HumanPedestrian(double x, double y, StudentWorld* sw);
     virtual void doSomething();
     virtual bool beSprayedIfAppropriate();
-    virtual bool takeDamageAndPossiblyDie(int hp);
+    //virtual bool takeDamageAndPossiblyDie(int hp);
     virtual ~HumanPedestrian();
     virtual bool isHuman() const {return true;}
-
+private:
+    
 };
 
 class ZombiePedestrian : public Pedestrian
@@ -195,6 +207,8 @@ public:
     virtual void doSomething();
     virtual bool beSprayedIfAppropriate();
     virtual ~ZombiePedestrian();
+private:
+    int m_ticksGrunt;
 };
 
 class ZombieCab : public Agent

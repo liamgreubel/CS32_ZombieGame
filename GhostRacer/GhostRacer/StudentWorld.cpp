@@ -54,6 +54,8 @@ int StudentWorld::init()
         m_score = 0;
     m_tempScore = m_score;  //if the user dies mid-level, score is reset to beginning of the level
     
+    m_racer->setState(false);
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -74,6 +76,10 @@ int StudentWorld::move()
                     if()
                 }*/
             }
+            if(m_racer->lostLife())
+            {
+                
+            }
             
         }
     }//end for loop
@@ -93,6 +99,7 @@ int StudentWorld::move()
     if(m_racer->getHP() <= 0)
     {
         decLives();
+        m_racer->setLife(m_racer->getLife()-1);
         m_score = m_tempScore;
         m_bonus = 5000;
         return GWSTATUS_PLAYER_DIED;
