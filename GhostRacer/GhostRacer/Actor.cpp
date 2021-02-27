@@ -8,7 +8,7 @@
 
 //ACTOR CLASS
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
-: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), /*m_vertSpeed(0), m_horizSpeed(0), */m_score(0), m_speed(0)
+: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_vertSpeed(0), m_horizSpeed(0), m_score(0)
 {}
 
 
@@ -24,6 +24,19 @@ bool Actor::isOverlap(Actor* racer)
     return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
 }
 
+void Actor::movement()
+{
+    GhostRacer* racer =getWorld()->getGhostRacer();
+    int vert_speed = getVerticalSpeed() - racer->getVerticalSpeed();
+    int horiz_speed = getHorizSpeed();
+    double new_y = getY() + vert_speed;
+    double new_x = getX() + horiz_speed;
+    moveTo(new_x, new_y);
+    if(isOffScreen())
+        setDead();
+}
+
+
 Agent::Agent(int imageID, double startX, double startY, int dir, double sz, int hp, StudentWorld* world)
 : Actor(imageID, startX, startY, dir, sz, 0, world), m_hp(hp)
 {}
@@ -35,6 +48,7 @@ GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
 : Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false), m_lives(3), m_lostLife(false)
 {
     setVerticalSpeed(0);
+    setHorizSpeed(0);
 }
 
 GhostRacer::~GhostRacer() {}
@@ -129,14 +143,15 @@ Pedestrian::Pedestrian(int imageID, double x, double y, double size, StudentWorl
 : Agent(imageID, x, y, 0, size, 2, world), m_hSpeed(0), m_plan(0)
 {
     setVerticalSpeed(-4);
+    setHorizSpeed(0);
 }
 
 Pedestrian::~Pedestrian() {}
 
 void Pedestrian::moveAndPossiblyPickPlan()
 {
-    int vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
-    int horiz_speed = getHorizSpeed();
+    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    double horiz_speed = getHorizSpeed();
     double new_y = getY() + vert_speed;
     double new_x = getX() + horiz_speed;
     moveTo(new_x, new_y);
@@ -241,6 +256,7 @@ BorderLine::BorderLine(int imageID, double startX, double startY, StudentWorld* 
 : Actor(imageID, startX, startY, 0, 2.0, 2, world)
 {
     setVerticalSpeed(-4);
+    setHorizSpeed(0);
 }
 
 BorderLine::~BorderLine()
@@ -248,13 +264,14 @@ BorderLine::~BorderLine()
 
 void BorderLine::doSomething()
 {
-    GhostRacer* racer = getWorld()->getGhostRacer();
+    /*GhostRacer* racer = getWorld()->getGhostRacer();
     int v_speed = getVerticalSpeed() - racer->getVerticalSpeed();
     double new_y = getY() + v_speed;
     double new_x = getX();
     moveTo(new_x,new_y);
     if(getY() < 0 || getY() > VIEW_HEIGHT)
-        setDead();
+        setDead();*/
+    movement();
 }
 
 
@@ -340,21 +357,15 @@ GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, doub
 : Actor(imageID, x, y, dir, size, 2, world)
 {
     setVerticalSpeed(-4);
+    if(!isProjectile())
+        setHorizSpeed(0);
 }
 
 GhostRacerActivatedObject::~GhostRacerActivatedObject() {}
 
 void GhostRacerActivatedObject::doSomething()
 {
-    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
-    double new_y = getY() + vert_speed;
-    double new_x = getX();
-    moveTo(new_x,new_y);
-    if( isOffScreen() )
-    {
-        setDead();
-        return;
-    }
+    movement();
     if(isOverlap(getWorld()->getGhostRacer()))
     {
         getWorld()->playSound(getSound());
@@ -445,7 +456,7 @@ void SoulGoodie::doActivity(GhostRacer* racer)
 
 void SoulGoodie::doSomething()
 {
-    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    /*double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
     double new_y = getY() + vert_speed;
     double new_x = getX();
     moveTo(new_x,new_y);
@@ -453,7 +464,7 @@ void SoulGoodie::doSomething()
     {
         setDead();
         return;
-    }
+     }*/movement();
     if(isOverlap(getWorld()->getGhostRacer()))
     {
         getWorld()->playSound(getSound());

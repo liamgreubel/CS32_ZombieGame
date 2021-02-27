@@ -23,14 +23,14 @@ public:
     StudentWorld* getWorld() const {return m_world;}
 
       // Get this actor's vertical speed.
-    double getVerticalSpeed() const {return m_speed;}
+    double getVerticalSpeed() const {return m_vertSpeed;}
 
       // Set this actor's vertical speed.
-    void setVerticalSpeed(double speed) {m_speed = speed;}
+    void setVerticalSpeed(double speed) {m_vertSpeed = speed;}
     
-    //double getHorizSpeed() const {return m_horizSpeed;}
+    double getHorizSpeed() const {return m_horizSpeed;}
     
-    //void setHorizSpeed(double speed) {m_horizSpeed = speed;}
+    void setHorizSpeed(double speed) {m_horizSpeed = speed;}
 
       // If this actor is affected by holy water projectiles, then inflict that
       // affect on it and return true; otherwise, return false.
@@ -44,6 +44,8 @@ public:
       // vertical speed.  Return true if the new position is within the view;
       // otherwise, return false, with the actor dead.
     //virtual bool moveRelativeToGhostRacerVerticalSpeed(double dx);
+    
+    virtual void movement();
     
     bool isOffScreen() {return (getX() < 0 || getX() > VIEW_WIDTH) || (getY() < 0 || getY() > VIEW_HEIGHT);}
     
@@ -61,7 +63,7 @@ public:
 private:
     StudentWorld* m_world;
     bool m_isDead;
-    double m_speed;
+    double m_vertSpeed;
     double m_horizSpeed;
     int m_score;
 };

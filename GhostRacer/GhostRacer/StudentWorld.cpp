@@ -50,8 +50,8 @@ int StudentWorld::init()
     m_racer->setSouls(0);
     m_racer->setSprays(10);
     //m_score = (getLevel() == 3) ? 0 : m_racer->getScore();
-    if(getLevel() == 1)
-        m_score = 0;
+    //if(getLevel() == 1)
+      //  m_score = 0;
     m_tempScore = m_score;  //if the user dies mid-level, score is reset to beginning of the level
     
     m_racer->setState(false);
@@ -100,7 +100,7 @@ int StudentWorld::move()
     {
         decLives();
         m_racer->setLife(m_racer->getLife()-1);
-        m_score = m_tempScore;
+        //m_score = m_tempScore;
         m_bonus = 5000;
         return GWSTATUS_PLAYER_DIED;
     }
