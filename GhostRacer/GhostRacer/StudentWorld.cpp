@@ -45,22 +45,22 @@ int StudentWorld::init()
     }
     y = m_vector.back()->getY();
     
-
+    m_numSouls = 2 * getLevel() + 5;
+    m_bonus = 5000;
+    m_racer->setSouls(0);
+    m_racer->setSp
+    //m_score = (getLevel() == 3) ? 0 : m_racer->getScore();
+    if(getLevel() == 1)
+        m_score = 0;
+    m_tempScore = m_score;  //if the user dies mid-level, score is reset to beginning of the level
+    
     return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move()
 {
-    setGameStatText("Score: " + to_string(m_racer->getScore())  + "  Lvl: 1  Souls2Save: 5  Lives: 3  Health: " + to_string(m_racer->getHP()) + "  Sprays: " + to_string(m_racer->getNumSprays()) + "  Bonus: 4321");
-    if(oil() == 0)
-    {
-        OilSlick* rand_oil = new OilSlick(randInt(LEFT_EDGE,RIGHT_EDGE), randInt(0, VIEW_HEIGHT), this);
-        m_vector.push_back(rand_oil);
-        HealingGoodie* heal = new HealingGoodie(150,250,this);
-        m_vector.push_back(heal);
-        HolyWaterGoodie* water = new HolyWaterGoodie(50,250,this);
-        m_vector.push_back(water);
-    }
+    setGameStatText("Score: " + to_string(m_score)  + "  Lvl: " + to_string(getLevel()) + "  Souls2Save: " + to_string(m_numSouls - m_racer->getSouls()) + "  Lives: " + to_string(getLives()) + "  Health: " + to_string(m_racer->getHP()) + "  Sprays: " + to_string(m_racer->getNumSprays()) + "  Bonus: " + to_string(m_bonus));
+    chanceAddActors();
     for(int i = 0 ; i < m_vector.size(); i++)
     {
         if(!m_vector.at(i)->isDead())
@@ -75,21 +75,38 @@ int StudentWorld::move()
                 }*/
             }
             
-            
         }
     }//end for loop
+    //update actors on screen
+    m_bonus--;  //decrement bonus 1 per tick
+    m_score += m_racer->getScore();
+    m_racer->setScore(0);
     remove();
     insert();
+    //update scoreline
     
-    //if(m_racer->isDead())
+    if(m_numSouls - m_racer->getSouls() == 0)
+    {
+        m_score += m_bonus;
+        return GWSTATUS_FINISHED_LEVEL;
+    }
+    if(m_racer->getHP() <= 0)
+    {
+        decLives();
+        m_score = m_tempScore;
+        m_bonus = 5000;
+        return GWSTATUS_PLAYER_DIED;
+    }
 
     return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp() //use loop w std::iterator to delete all actors at the end
 {
+    if(m_vector.empty())
+        return;
     vector<Actor*>::iterator it = m_vector.end()-1;
-    for(; it != m_vector.begin();)
+    for(; it != m_vector.begin()-1;)
     {
         delete *it;
         m_vector.pop_back();
@@ -176,3 +193,79 @@ void StudentWorld::setSpray()
     }
     m_racer->setWater(false);
 }
+
+
+int StudentWorld::chanceOilSlick()
+{
+    int oil_max = std::max(150 - getLevel() * 10, 40);
+    return randInt(0, oil_max-1);
+}
+int StudentWorld::chanceZPed()
+{
+    int zped_max = std::max(100 - getLevel() * 10, 20);
+    return randInt(0, zped_max-1);
+}
+int StudentWorld::chanceHPed()
+{
+    int hped_max = std::max(200 - getLevel() * 10, 30);
+    return randInt(0, hped_max-1);
+}
+int StudentWorld::chanceBottleRefill()
+{
+    return randInt(0,100 + (10 * getLevel()));
+}
+int StudentWorld::chanceSoul() {return randInt(0,99);}
+
+void StudentWorld::chanceAddActors()
+{
+    if(chanceOilSlick() == 0)
+    {
+        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        m_vector.push_back(oil);
+    }
+    /*if(chanceZPed() == 0)
+    {
+        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        m_vector.push_back(oil);
+    }*/
+    /*if(chanceHPed() == 0)
+    {
+        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        m_vector.push_back(oil);
+    }*/
+    if(chanceBottleRefill() == 0)
+    {
+        HolyWaterGoodie* water = new HolyWaterGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        m_vector.push_back(water);
+    }
+    if(chanceSoul() == 0)
+    {
+        SoulGoodie* soul = new SoulGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        m_vector.push_back(soul);
+    }
+}
+
+
+/*
+void StudentWorld::chanceSoul()
+{
+    int rand_souls = randInt(0,99);
+    if(rand_souls == 0)
+    {
+        SoulGoodie* soul = new SoulGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH,RIGHT_EDGE-SPRITE_WIDTH),VIEW_HEIGHT,this);
+        m_vector.push_back(soul);
+    }
+}
+
+void StudentWorld::chanceOilSlick()
+{
+    int chance = max(150 - getLevel() * 10, 40);
+    int rand = randInt(0, chance-1);
+    if(rand == 0)
+    {
+        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        m_vector.push_back(oil);
+    }
+}
+
+*/

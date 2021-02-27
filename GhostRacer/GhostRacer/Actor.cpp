@@ -113,10 +113,7 @@ void GhostRacer::spin()
 {
     int randDir;
     int randClock = randInt(0,1);
-    randDir = (randClock == 0) ? (randDir = randInt(5,20)) : (randDir = randInt(-20,-5));//turn randomly in CW or CCW direction
-        //andDir = randInt(5,20);
-   // else    //turn randomly in counter-clockwise direction
-        //randDir = randInt(-20,-5);
+    randDir = (randClock == 0) ? (randDir = randInt(5,20)) : (randDir = randInt(-20,-5));   //turn randomly in CW or CCW direction
     
     int new_dir = getDirection() + randDir;
     if(new_dir < 60)
@@ -167,7 +164,7 @@ White::~White() {};
 
 
 Spray::Spray(double x, double y, int dir, StudentWorld* world)
-: Actor(IID_HOLY_WATER_PROJECTILE, x, y, dir, 1.0, 1, world)
+: Actor(IID_HOLY_WATER_PROJECTILE, x, y, dir, 1.0, 1, world), m_pixelsMoved(0)
 {}
 
 Spray::~Spray() {}
@@ -181,8 +178,35 @@ void Spray::doSomething()
     //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
     if(getWorld()->getGhostRacer()->hasActiveWater())
     {
-        //if(
+        //isOverlap();
     }
+}
+
+void Spray::hasOverlapped(Actor* other)
+{
+    if(isOverlap(other) && other->beSprayedIfAppropriate())
+    {
+        /*if(other->isHuman())
+            //REVERSE DIRECTION
+        else
+            other->changeHP(-1);
+         setDead();
+         return;
+         */
+        
+    }
+    else
+    {
+        moveForward(SPRITE_HEIGHT);
+        m_pixelsMoved++;
+    }
+    if(isOffScreen())
+    {
+        setDead();
+        return;
+    }
+    if(m_pixelsMoved == 160)
+        setDead();
 }
 
 
@@ -236,8 +260,8 @@ void OilSlick::doSomething()
 
 void OilSlick::doActivity(GhostRacer* racer)
 {
-    double delta_x = abs(getX() - racer->getX());
-    double delta_y = abs(getY() - racer->getY());
+    double delta_x = fabs(getX() - racer->getX());
+    double delta_y = fabs(getY() - racer->getY());
     double radius_sum = getRadius() + racer->getRadius();
         
     if( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) )
@@ -260,7 +284,9 @@ HealingGoodie::~HealingGoodie() {}
 void HealingGoodie::doActivity(GhostRacer *racer)
 {
     racer->changeHP(10);
-    racer->changeScore(250);
+    if(racer->getHP() > 100)
+        racer->setHP(100);
+    racer->setScore(250);
 }
 
 HolyWaterGoodie::HolyWaterGoodie(double x, double y, StudentWorld* world)
@@ -274,5 +300,39 @@ HolyWaterGoodie::~HolyWaterGoodie() {}
 void HolyWaterGoodie::doActivity(GhostRacer *racer)
 {
     racer->increaseSprays(10);
-    racer->changeScore(50);
+    racer->setScore(50);
+}
+
+
+SoulGoodie::SoulGoodie(double x, double y, StudentWorld* world)
+: GhostRacerActivatedObject(IID_SOUL_GOODIE, x, y, 0, 4.0, world)
+{
+}
+
+SoulGoodie::~SoulGoodie() {}
+
+void SoulGoodie::doActivity(GhostRacer* racer)
+{
+    racer->incSouls();
+    racer->setScore(100);
+}
+
+void SoulGoodie::doSomething()
+{
+    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    double new_y = getY() + vert_speed;
+    double new_x = getX();
+    moveTo(new_x,new_y);
+    if( isOffScreen() )
+    {
+        setDead();
+        return;
+    }
+    if(isOverlap(getWorld()->getGhostRacer()))
+    {
+        getWorld()->playSound(getSound());
+        doActivity(getWorld()->getGhostRacer());
+        setDead();
+    }
+    setDirection(getDirection() + 10);
 }

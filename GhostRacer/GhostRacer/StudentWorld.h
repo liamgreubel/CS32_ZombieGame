@@ -41,15 +41,23 @@ public:
     void remove();
     void insert();
     void setSpray();
-    int chanceOilSlick() {return fmax(150 - /*L*/ 5 * 10, 40);}
-    int oil() {return randInt(0,chanceOilSlick());}
-    
-    
+    int chanceOilSlick();
+    int chanceZPed();
+    int chanceHPed();
+    int chanceBottleRefill();
+    int chanceSoul();
+    void chanceAddActors();
+    //int chanceHeal();
     
 private:
     std::vector<Actor*> m_vector;
     GhostRacer* m_racer;
     double y;
+    int m_numSouls;
+    int m_bonus;
+    int m_score;
+    int m_tempScore;
+    int m_runningScore;
 };
 
 #endif

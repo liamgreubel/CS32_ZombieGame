@@ -48,10 +48,16 @@ public:
     bool isOffScreen() {return (getX() < 0 || getX() > VIEW_WIDTH) || (getY() < 0 || getY() > VIEW_HEIGHT);}
     
     bool isOverlap(Actor* racer);
+    bool isOverlap(Actor* a, Actor* b);
     
     int getScore() {return m_score;}
     
+    void setScore(int s) {m_score = s;}
+    
     void changeScore(int n) {m_score += n;}
+    
+    virtual bool isHuman() const {return false;}
+
     
     
 private:
@@ -99,6 +105,8 @@ public:
 
       // Increase hit points by hp.
     void changeHP(int hp) {m_hp += hp;}
+    
+    void setHP(int hp) {m_hp = hp;}
 
       // Do what the spec says happens when hp units of damage is inflicted.
       // Return true if this agent dies as a result, otherwise false.
@@ -138,6 +146,8 @@ public:
     
     void incSouls() {m_souls++;}
     
+    void setSouls(int n) {m_souls = n;}
+    
 private:
     int m_waterSprays;
     int m_souls;
@@ -170,6 +180,8 @@ public:
     virtual bool beSprayedIfAppropriate();
     virtual bool takeDamageAndPossiblyDie(int hp);
     virtual ~HumanPedestrian();
+    virtual bool isHuman() const {return true;}
+
 };
 
 class ZombiePedestrian : public Pedestrian
@@ -196,7 +208,10 @@ class Spray : public Actor
 public:
     Spray(double x, double y, int dir, StudentWorld* sw);
     virtual void doSomething();
+    void hasOverlapped(Actor* other);
     virtual ~Spray();
+private:
+    int m_pixelsMoved;
 };
 
 class GhostRacerActivatedObject : public Actor
@@ -255,7 +270,7 @@ public:
     HolyWaterGoodie(double x, double y, StudentWorld* sw);
     //virtual void doSomething();
     virtual void doActivity(GhostRacer* gr);
-    //virtual int getScoreIncrease() const;
+    //virtual int getScoreIncrease() const {return 50;}
     //virtual bool selfDestructs() const;
     //virtual bool isSprayable() const;
     virtual ~HolyWaterGoodie();
@@ -267,10 +282,10 @@ public:
     SoulGoodie(double x, double y, StudentWorld* sw);
     virtual void doSomething();
     virtual void doActivity(GhostRacer* gr);
-    virtual int getScoreIncrease() const;
+    //virtual int getScoreIncrease() const {return 100;}
     virtual int getSound() const {return SOUND_GOT_SOUL;}
-    virtual bool selfDestructs() const;
-    virtual bool isSprayable() const;
+    //virtual bool selfDestructs() const;
+    //virtual bool isSprayable() const;
     virtual ~SoulGoodie();
 };
 
