@@ -126,16 +126,23 @@ void GhostRacer::doSomething()
 void GhostRacer::spin()
 {
     int randDir;
-    int randClock = randInt(0,1);
-    randDir = (randClock == 0) ? (randDir = randInt(5,20)) : (randDir = randInt(-20,-5));   //turn randomly in CW or CCW direction
-    
-    int new_dir = getDirection() + randDir;
-    if(new_dir < 60)
-        setDirection(60);
-    if(new_dir > 120)
-        setDirection(120);
+    /*int randClock = randInt(0,1);
+    randDir = randInt(5,20);
+    if(randClock == 1)
+        newDir = getDirection() + randDir;
     else
-        setDirection(new_dir);
+        newDir = getDirection() - randDir;*/
+    
+    randDir = randInt(5,20);
+    int CW = getDirection() - randDir;
+    int CCW = getDirection() + randDir;
+    
+    if(CW < 60)
+        setDirection(CCW);
+    else if(CCW > 120)
+        setDirection(CW);
+    else
+        setDirection(CW);
 }
 
 
@@ -202,12 +209,37 @@ void HumanPedestrian::doSomething()
         racer->setHP(0);
         return;
     }
-    moveAndPossiblyPickPlan();
-    if(isDead())
+    //moveAndPossiblyPickPlan();
+    double vert_speed = getVerticalSpeed() - getWorld()->getGhostRacer()->getVerticalSpeed();
+    double horiz_speed = getHorizSpeed();
+    double new_y = getY() + vert_speed;
+    double new_x = getX() + horiz_speed;
+    moveTo(new_x, new_y);
+    if(isOffScreen())
+    {
+        setDead();
         return;
+    }
+    incPlan(-1);
     if(getPlan() > 0)
         return;
-    
+    else
+    {
+        int new_h = randInt(-3,3);
+        if(new_h != 0)
+        {
+            setHorizSpeed(new_h);
+        }
+        setPlan(randInt(4,32));
+        if(getHorizSpeed() < 0)
+            setDirection(180);
+        else
+            setDirection(0);
+        if(isDead())
+            return;
+        if(getPlan() > 0)
+            return;
+    }
 }
 
 
@@ -225,6 +257,7 @@ void ZombiePedestrian::doSomething()
     if(isOverlap(racer))
     {
         racer->changeHP(-5);
+        getWorld()->playSound(soundWhenHurt());
         changeHP(-2);
         setDead();
         return;

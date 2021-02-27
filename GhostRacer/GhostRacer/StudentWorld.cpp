@@ -49,10 +49,13 @@ int StudentWorld::init()
     m_bonus = 5000;
     m_racer->setSouls(0);
     m_racer->setSprays(10);
-    //m_score = (getLevel() == 3) ? 0 : m_racer->getScore();
-    //if(getLevel() == 1)
-      //  m_score = 0;
-    m_tempScore = m_score;  //if the user dies mid-level, score is reset to beginning of the level
+    if(getLevel() == 1 && getLives() == 3)
+    {
+        m_score = 0;
+        m_tempScore = 0;
+    }
+    m_score = 0;
+    m_score += m_tempScore;
     
     m_racer->setState(false);
     
@@ -100,7 +103,7 @@ int StudentWorld::move()
     {
         decLives();
         m_racer->setLife(m_racer->getLife()-1);
-        //m_score = m_tempScore;
+        m_tempScore = m_score;
         m_bonus = 5000;
         return GWSTATUS_PLAYER_DIED;
     }
@@ -251,28 +254,3 @@ void StudentWorld::chanceAddActors()
         m_vector.push_back(soul);
     }
 }
-
-
-/*
-void StudentWorld::chanceSoul()
-{
-    int rand_souls = randInt(0,99);
-    if(rand_souls == 0)
-    {
-        SoulGoodie* soul = new SoulGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH,RIGHT_EDGE-SPRITE_WIDTH),VIEW_HEIGHT,this);
-        m_vector.push_back(soul);
-    }
-}
-
-void StudentWorld::chanceOilSlick()
-{
-    int chance = max(150 - getLevel() * 10, 40);
-    int rand = randInt(0, chance-1);
-    if(rand == 0)
-    {
-        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
-        m_vector.push_back(oil);
-    }
-}
-
-*/
