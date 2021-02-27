@@ -219,7 +219,7 @@ int StudentWorld::chanceHPed()
 }
 int StudentWorld::chanceBottleRefill()
 {
-    return randInt(0,100 + (10 * getLevel()));
+    return randInt(0,100 + 10 * getLevel());
 }
 int StudentWorld::chanceSoul() {return randInt(0,99);}
 
@@ -227,27 +227,27 @@ void StudentWorld::chanceAddActors()
 {
     if(chanceOilSlick() == 0)
     {
-        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_HEIGHT, this);
         m_vector.push_back(oil);
     }
-    /*if(chanceZPed() == 0)
+    if(chanceZPed() == 0)
     {
-        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
-        m_vector.push_back(oil);
-    }*/
-    /*if(chanceHPed() == 0)
+        ZombiePedestrian* zped = new ZombiePedestrian(randInt(0, VIEW_WIDTH), VIEW_HEIGHT, this);
+        m_vector.push_back(zped);
+    }
+    if(chanceHPed() == 0)
     {
-        OilSlick* oil = new OilSlick(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
-        m_vector.push_back(oil);
-    }*/
+        HumanPedestrian* hped = new HumanPedestrian(randInt(0, VIEW_WIDTH), VIEW_HEIGHT, this);
+        m_vector.push_back(hped);
+    }
     if(chanceBottleRefill() == 0)
     {
-        HolyWaterGoodie* water = new HolyWaterGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        HolyWaterGoodie* water = new HolyWaterGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_HEIGHT, this);
         m_vector.push_back(water);
     }
     if(chanceSoul() == 0)
     {
-        SoulGoodie* soul = new SoulGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_WIDTH, this);
+        SoulGoodie* soul = new SoulGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_HEIGHT, this);
         m_vector.push_back(soul);
     }
 }

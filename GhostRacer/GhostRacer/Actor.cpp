@@ -8,7 +8,7 @@
 
 //ACTOR CLASS
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
-: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_speed(0), m_score(0000)
+: GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), /*m_vertSpeed(0), m_horizSpeed(0), */m_score(0), m_speed(0)
 {}
 
 
@@ -159,7 +159,7 @@ void Pedestrian::moveAndPossiblyPickPlan()
             return;
         }
     }
-    while(getHorizSpeed() != 0)
+    while(getHorizSpeed() == 0)
     {
         setHorizSpeed(randInt(-3,3));
     }
@@ -190,6 +190,9 @@ void HumanPedestrian::doSomething()
     moveAndPossiblyPickPlan();
     if(isDead())
         return;
+    if(getPlan() > 0)
+        return;
+    
 }
 
 
@@ -208,14 +211,15 @@ void ZombiePedestrian::doSomething()
     {
         racer->changeHP(-5);
         changeHP(-2);
+        setDead();
         return;
     }
-    if(abs(getX() - racer->getX()) <= 30 && getY() - racer->getY() > 0)
+    if(abs(getX() - racer->getX()) <= 30.0 && getY() > racer->getY())
     {
         setDirection(270);
-        if(getX() - racer->getX() < 0)
+        if(getX() < racer->getX())
             setHorizSpeed(1);
-        else if (getX() - racer->getX() > 0)
+        else if (getX() > racer->getX())
             setHorizSpeed(-1);
         else
             setHorizSpeed(0);
@@ -287,7 +291,7 @@ void Spray::doSomething()
     {
         //hasOverlapped();
         moveForward(SPRITE_HEIGHT);
-        m_pixelsMoved += 8;
+        m_pixelsMoved += SPRITE_HEIGHT;
         if(isOffScreen())
         {
             setDead();
