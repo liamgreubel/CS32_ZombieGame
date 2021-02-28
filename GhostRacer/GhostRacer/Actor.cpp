@@ -72,18 +72,19 @@ int Actor::getLane()//determine which lane an actor is in
 
 
 
-Agent::Agent(int imageID, double startX, double startY, int dir, double sz, int hp, StudentWorld* world)
-: Actor(imageID, startX, startY, dir, sz, 0, world), m_hp(hp)
+Agent::Agent(int imageID, double startX, double startY, int dir, double sz, StudentWorld* world)
+: Actor(imageID, startX, startY, dir, sz, 0, world)
 {}
 
 Agent::~Agent() {}
 
 
 GhostRacer::GhostRacer(double startX, double startY, StudentWorld* world)
-: Agent(IID_GHOST_RACER,128,32,90,4.0,100,world), m_waterSprays(10), m_souls(0), m_waterActive(false), m_lives(3), m_lostLife(false), m_shotWater(false)
+: Agent(IID_GHOST_RACER,128,32,90,4.0,world), m_waterSprays(10), m_souls(0), m_waterActive(false), m_lives(3), m_lostLife(false), m_shotWater(false)
 {
     setVerticalSpeed(0);
     setHorizSpeed(0);
+    setHP(100);
 }
 
 GhostRacer::~GhostRacer() {}
@@ -119,17 +120,27 @@ void GhostRacer::doSomething()
             case KEY_PRESS_SPACE:
                 if(getNumSprays() > 0)
                 {
-                    int spray_x;
-                    if(direction > 90)
-                        spray_x = getX() - SPRITE_HEIGHT;
-                    if(direction < 90)
-                        spray_x = getX() + SPRITE_HEIGHT;
-                    else
-                        spray_x = getX();
-                    //Spray* new_spray = new Spray(spray_x,getY() + SPRITE_HEIGHT,direction,getWorld());
-                    //TODO: make flag here to signal to StudentWorld that a new spray needs to be added
-                    //setWater(true);
                     setShot(true);
+                    int dir = getDirection();
+                    double delta_x, delta_y;
+                    if(getDirection() > 90)
+                    {
+                        delta_x = (SPRITE_HEIGHT) * cos( (getDirection() * M_PI / 180) );
+                        delta_y = (SPRITE_HEIGHT) * sin( (getDirection() * M_PI / 180) );
+                    }
+                    if(getDirection() < 90)
+                    {
+                        delta_x = (SPRITE_HEIGHT) * cos( ((getDirection()) * M_PI / 180) );
+                        delta_y = (SPRITE_HEIGHT) * sin( (getDirection() * M_PI / 180) );
+                    }
+                    else
+                    {
+                        delta_x = 0;
+                        delta_y = 0;
+                    }
+                    dir = getDirection();
+                    Spray* spray = new Spray(delta_x+getX(),delta_y+getY(),dir,getWorld());
+                    getWorld()->addActor(spray);
                     getWorld()->playSound(SOUND_PLAYER_SPRAY);
                     increaseSprays(-1);
                 }
@@ -188,10 +199,11 @@ void GhostRacer::spin()
 
 
 Pedestrian::Pedestrian(int imageID, double x, double y, double size, StudentWorld* world)
-: Agent(imageID, x, y, 0, size, 2, world), m_hSpeed(0), m_plan(0)
+: Agent(imageID, x, y, 0, size, world), m_hSpeed(0), m_plan(0)
 {
     setVerticalSpeed(-4);
     setHorizSpeed(0);
+    setHP(2);
 }
 
 Pedestrian::~Pedestrian() {}
@@ -236,7 +248,11 @@ void Pedestrian::moveAndPossiblyPickPlan()
 
 HumanPedestrian::HumanPedestrian(double x, double y, StudentWorld* sw)
 : Pedestrian(IID_HUMAN_PED, x, y, 2.0, sw)
-{}
+{
+    setHorizSpeed(0);
+    setVerticalSpeed(-4);
+    setHP(2);
+}
 
 HumanPedestrian::~HumanPedestrian() {}
 
@@ -286,7 +302,11 @@ void HumanPedestrian::doSomething()
 bool HumanPedestrian::beSprayedIfAppropriate()
 {
     setHorizSpeed(getHorizSpeed() * -1);
-    int new_dir = (getDirection() == 0) ? 180 : 0;  //change direction
+    int new_dir;
+    if(getDirection() == 0)
+        new_dir = 180;
+    else
+        new_dir = 0;
     setDirection(new_dir);
     return true;
 }
@@ -294,7 +314,9 @@ bool HumanPedestrian::beSprayedIfAppropriate()
 
 ZombiePedestrian::ZombiePedestrian(double x, double y, StudentWorld* sw)
 : Pedestrian(IID_ZOMBIE_PED, x, y, 3.0, sw), m_ticksGrunt(0)
-{}
+{
+    setHP(2);
+}
 
 ZombiePedestrian::~ZombiePedestrian() {}
 
@@ -334,11 +356,13 @@ void ZombiePedestrian::doSomething()
 bool ZombiePedestrian::beSprayedIfAppropriate()
 {
     changeHP(-1);
+    if(getHP() <= 0)
+        setDead();
     return true;
 }
 
 ZombieCab::ZombieCab(double x, double y, StudentWorld* sw)
-: Agent(IID_ZOMBIE_CAB, x, y, 90, 4.0, 3, sw), m_plan(0), m_hasDamaged(false)
+: Agent(IID_ZOMBIE_CAB, x, y, 90, 4.0, sw), m_plan(0), m_hasDamaged(false)
 {
     setVerticalSpeed(0);
     setHorizSpeed(0);
@@ -432,9 +456,7 @@ void Spray::doSomething()
     //Actor* other;
     if(isDead())
         return;
-    //TODO: IMPLEMENT P. 46 PSEUDOCODE
-    //TODO: FIX STARTING POSITION IN STUDENTWORLD.CPP
-    if(getWorld()->sprayFirstAppropriateActor(this))
+    if(getWorld()->sprayFirstAppropriateActor(this) == true)
     {
         setDead();
         return;
@@ -443,35 +465,12 @@ void Spray::doSomething()
     {
         moveForward(SPRITE_HEIGHT);
         m_pixelsMoved += SPRITE_HEIGHT;
-        if(isOffScreen() || m_pixelsMoved == 160)
+        if(isOffScreen() || m_pixelsMoved >= 160)
         {
             setDead();
             m_pixelsMoved = 0;
-            getWorld()->getGhostRacer()->setWater(false);
         }
-        
     }
-    
-    
-    
-    
-    /*if(getWorld()->getGhostRacer()->hasActiveWater())
-    {
-        //hasOverlapped();
-        moveForward(SPRITE_HEIGHT);
-        m_pixelsMoved += SPRITE_HEIGHT;
-        if(isOffScreen())
-        {
-            setDead();
-            return;
-        }
-        if(m_pixelsMoved == 160)
-        {
-            setDead();
-            getWorld()->getGhostRacer()->setWater(false);
-        }
-    }*/
-    
 }
 
 void Spray::hasOverlapped(/*Actor* other*/)

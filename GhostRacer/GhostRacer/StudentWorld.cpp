@@ -72,14 +72,6 @@ int StudentWorld::move()
         if(!m_vector.at(i)->isDead())
         {
             m_vector.at(i)->doSomething();
-            if(m_racer->hasShot())
-            {
-                setSpray();//TODO: ONLY INITIALIZATION IMPLEMENTED - ADD MOVEMENT
-            }
-            /*if(m_racer->lostLife())
-            {
-                
-            }*/
             if( (!m_vector.at(i)->isDead()) && (m_vector.at(i)->isCollisionAvoidanceWorthy()) )
             {
                 int q = m_vector.at(i)->getLane();
@@ -107,15 +99,18 @@ int StudentWorld::move()
     }//end for loop
     //update actors on screen
     m_bonus--;  //decrement bonus 1 per tick
+    if(m_bonus < 0)
+        m_bonus = 0;
     m_score += m_racer->getScore();
     m_racer->setScore(0);
     remove();
     insert();
     //update scoreline
     
-    if(m_numSouls - m_racer->getSouls() == 0)
+    if(m_numSouls == m_racer->getSouls())
     {
         m_score += m_bonus;
+        playSound(SOUND_FINISHED_LEVEL);
         return GWSTATUS_FINISHED_LEVEL;
     }
     if(m_racer->getHP() <= 0)
@@ -170,7 +165,7 @@ bool StudentWorld::overlaps(const Actor* a1, const Actor* a2) const
     double delta_y = abs(a1->getY() - a2->getY());
     double radius_sum = a1->getRadius() + a2->getRadius();
         
-    return ( delta_x < (radius_sum * 0.25) && (delta_y < radius_sum * 0.6) );
+    return ( (delta_x < (radius_sum * 0.25)) && (delta_y < (radius_sum * 0.6)) );
 }
 
 void StudentWorld::insert()
@@ -196,32 +191,6 @@ void StudentWorld::insert()
         y = (m_vector.back())->getY();
     }
 }
-
-void StudentWorld::setSpray()
-{
-    int direction = m_racer->getDirection();
-    double spray_x, spray_y;
-    if(direction > 90)
-    {
-        spray_x = (m_racer->getX() + m_racer->getRadius()) * cos( (m_racer->getDirection() * M_PI / 180) );
-        spray_y = (m_racer->getY() + m_racer->getRadius()) * sin( (m_racer->getDirection() * M_PI / 180) );
-    }
-    if(direction < 90)
-    {
-        spray_x = m_racer->getX() + m_racer->getRadius() * cos( ((m_racer->getDirection()) * M_PI / 180) );
-        spray_y = m_racer->getY() + m_racer->getRadius() * sin( (m_racer->getDirection() * M_PI / 180) );
-    }
-    else
-    {
-        spray_x = m_racer->getX();
-        spray_y = m_racer->getY() + m_racer->getRadius() + SPRITE_HEIGHT;
-    }
-    Spray* new_spray = new Spray(spray_x,spray_y,direction,this);
-    m_vector.push_back(new_spray);
-    m_racer->setShot(false);
-    m_racer->setWater(true);
-}
-
 
 int StudentWorld::chanceOilSlick()
 {
@@ -278,10 +247,21 @@ bool StudentWorld::sprayFirstAppropriateActor(Actor* a)
     vector<Actor*>::iterator it = m_vector.begin();
     for(; it != m_vector.end(); it++)
     {
-        if((!(*it)->isDead()) && overlaps(*it,a) && (*it)->beSprayedIfAppropriate())
+        if(((*it)->isDead() == false) && a->isOverlap(*it) && (*it)->beSprayedIfAppropriate() == true)
+        {
+            //increaseScore(*it)
+            
             return true;
+        }
     }
     return false;
+}
+
+
+void StudentWorld::addActor(Actor* a)
+{
+    
+    m_vector.push_back(a);
 }
 
 /*bool StudentWorld::hasCollInLane(Actor* a)

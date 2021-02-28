@@ -101,7 +101,7 @@ private:
 class Agent : public Actor
 {
 public:
-    Agent(int imageID, double x, double y, int dir, double sz, int hp, StudentWorld* sw);
+    Agent(int imageID, double x, double y, int dir, double sz, StudentWorld* sw);
 
     virtual ~Agent();
 
