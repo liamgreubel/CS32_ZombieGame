@@ -4,7 +4,7 @@
 #include <cmath>
 
 
-//class for pure virtual Actor class inheriting from GraphObject class
+//class for abstract Actor class inheriting from GraphObject class
 Actor::Actor(int imageID, double startX, double startY, int dir, double sz, int depth, StudentWorld* world)
 : GraphObject(imageID, startX, startY, dir, sz, depth), m_world(world), m_isDead(false), m_vertSpeed(0), m_horizSpeed(0), m_score(0)
 {}
@@ -60,7 +60,7 @@ int Actor::getLane()//determine which lane an actor is in. Not fully implemented
 }
 
 
-//pure virtual class inheriting directly from Actor class
+//abstract class inheriting directly from Actor class
 Agent::Agent(int imageID, double startX, double startY, int dir, double sz, StudentWorld* world)
 : Actor(imageID, startX, startY, dir, sz, 0, world)
 {}
@@ -497,7 +497,7 @@ void Spray::doSomething()
     }
 }
 
-//class for pure virtual class inheriting directly from Actor class
+//class for abstract class inheriting directly from Actor class
 GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, StudentWorld* world)
 : Actor(imageID, x, y, dir, size, 2, world)
 {
