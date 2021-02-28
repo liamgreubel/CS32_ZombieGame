@@ -43,6 +43,7 @@ public:
     int chanceHPed();
     int chanceBottleRefill();
     int chanceSoul();
+    int chanceCab();
     void chanceAddActors();
     bool hasCollInLane(Actor* a);
     

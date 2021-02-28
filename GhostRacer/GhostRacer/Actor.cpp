@@ -44,14 +44,9 @@ int Actor::checkLane(Actor* a)  //returns lane with corresponding actors. if no 
 {
     if(a->isCollisionAvoidanceWorthy())
     {
-        //return whichLane(this,a);
-        
+        return getWorld()->hasCollInLane(a);
     }
-    else
-    {
-        return 0;
-    }
-    return 0;
+    return -1;
 }
 
 int Actor::getLane()//determine which lane an actor is in
@@ -120,7 +115,7 @@ void GhostRacer::doSomething()
             case KEY_PRESS_SPACE:
                 if(getNumSprays() > 0)
                 {
-                    setShot(true);
+                    //setShot(true);
                     int dir = getDirection();
                     double delta_x, delta_y;
                     if(getDirection() > 90)
@@ -130,7 +125,7 @@ void GhostRacer::doSomething()
                     }
                     if(getDirection() < 90)
                     {
-                        delta_x = (SPRITE_HEIGHT) * cos( ((getDirection()) * M_PI / 180) );
+                        delta_x = (SPRITE_HEIGHT) * cos( (getDirection() * M_PI / 180) );
                         delta_y = (SPRITE_HEIGHT) * sin( (getDirection() * M_PI / 180) );
                     }
                     else
@@ -366,6 +361,7 @@ ZombieCab::ZombieCab(double x, double y, StudentWorld* sw)
 {
     setVerticalSpeed(0);
     setHorizSpeed(0);
+    setHP(3);
 }
 
 ZombieCab::~ZombieCab() {}
@@ -398,11 +394,16 @@ void ZombieCab::doSomething()
     }
     else
     {
-        movement();//keep???    //step 3
+        movement();    //step 3
         if(isDead())
             return;
+        
     }
-    //if(getVerticalSpeed() > racer->getVerticalSpeed() && checkLane())
+    /*if(getVerticalSpeed() > racer->getVerticalSpeed() && collision-worthy) //step 4
+    {
+        
+    }*/
+    
 }
 
 //BORDERLINE CLASS
@@ -453,7 +454,6 @@ Spray::~Spray() {}
 
 void Spray::doSomething()
 {
-    //Actor* other;
     if(isDead())
         return;
     if(getWorld()->sprayFirstAppropriateActor(this) == true)
@@ -473,17 +473,16 @@ void Spray::doSomething()
     }
 }
 
-void Spray::hasOverlapped(/*Actor* other*/)
+/*void Spray::hasOverlapped(Actor* other)
 {
-    if(/*isOverlap(other) && other->beSprayedIfAppropriate()*/1 == 0)
+    if(isOverlap(other) && other->beSprayedIfAppropriate())
     {
-        /*if(other->isHuman())
+        if(other->isHuman())
             //REVERSE DIRECTION
         else
             other->changeHP(-1);
          setDead();
          return;
-         */
         return;
     }
     else
@@ -501,7 +500,7 @@ void Spray::hasOverlapped(/*Actor* other*/)
         setDead();
         getWorld()->getGhostRacer()->setWater(false);
     }
-}
+}*/
 
 
 GhostRacerActivatedObject::GhostRacerActivatedObject(int imageID, double x, double y, int dir, double size, StudentWorld* world)

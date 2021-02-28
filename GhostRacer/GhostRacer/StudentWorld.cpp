@@ -65,6 +65,7 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
+    int lane;
     setGameStatText("Score: " + to_string(m_score)  + "  Lvl: " + to_string(getLevel()) + "  Souls2Save: " + to_string(m_numSouls - m_racer->getSouls()) + "  Lives: " + to_string(getLives()) + "  Health: " + to_string(m_racer->getHP()) + "  Sprays: " + to_string(m_racer->getNumSprays()) + "  Bonus: " + to_string(m_bonus));
     chanceAddActors();
     for(int i = 0 ; i < m_vector.size(); i++)
@@ -72,31 +73,54 @@ int StudentWorld::move()
         if(!m_vector.at(i)->isDead())
         {
             m_vector.at(i)->doSomething();
-            if( (!m_vector.at(i)->isDead()) && (m_vector.at(i)->isCollisionAvoidanceWorthy()) )
-            {
-                int q = m_vector.at(i)->getLane();
-                switch(q)
-                {
-                    case 1:
-                        m_occupiedLanes[0] = true;
-                        break;
-                    case 2:
-                        m_occupiedLanes[1] = true;
-                        break;
-                    case 3:
-                        m_occupiedLanes[2] = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            /*if(m_vector.at(i)->canDrive())//if cab
-            {
-                
-            }*/
             
+            
+            if(m_vector.at(i)->canDrive())
+            {
+                lane = m_vector.at(i)->getLane();
+            }
+             
+             /*if( (!m_vector.at(i)->isDead()) && (m_vector.at(i)->isCollisionAvoidanceWorthy()) )
+             {
+                 int lane_no = m_vector.at(i)->getLane();
+                 switch(lane_no)
+                 {
+                     case 1:
+                         m_occupiedLanes[0] = true;
+                         break;
+                     case 2:
+                         m_occupiedLanes[1] = true;
+                         break;
+                     case 3:
+                         m_occupiedLanes[2] = true;
+                         break;
+                     default:
+                         break;
+                 }
+             }*/
         }
     }//end for loop
+    /*for(int k = 0; k < m_vector.size(); k++)
+    {
+        if( (!m_vector.at(k)->isDead()) && (m_vector.at(k)->isCollisionAvoidanceWorthy()) )
+        {
+            int lane_no = m_vector.at(k)->getLane();
+            switch(lane_no)
+            {
+                case 1:
+                    m_occupiedLanes[0] = true;
+                    break;
+                case 2:
+                    m_occupiedLanes[1] = true;
+                    break;
+                case 3:
+                    m_occupiedLanes[2] = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }*/
     //update actors on screen
     m_bonus--;  //decrement bonus 1 per tick
     if(m_bonus < 0)
@@ -213,6 +237,12 @@ int StudentWorld::chanceBottleRefill()
 }
 int StudentWorld::chanceSoul() {return randInt(0,99);}
 
+int StudentWorld::chanceCab()
+{
+    int cab_max = max(100-getLevel()*10,20);
+    return randInt(0,cab_max-1);
+}
+
 void StudentWorld::chanceAddActors()
 {
     if(chanceOilSlick() == 0)
@@ -240,6 +270,22 @@ void StudentWorld::chanceAddActors()
         SoulGoodie* soul = new SoulGoodie(randInt(LEFT_EDGE+SPRITE_WIDTH, RIGHT_EDGE - SPRITE_WIDTH), VIEW_HEIGHT, this);
         m_vector.push_back(soul);
     }
+    if(chanceCab() == 0)
+    {
+        double cur_lane;
+        int num = randInt(0,2);
+        if(num % 2 == 1)
+            cur_lane = ROAD_CENTER + ROAD_WIDTH/3;
+        else if(num % 1 == 1)
+            cur_lane = ROAD_CENTER - ROAD_WIDTH/3;
+        else
+            cur_lane = ROAD_CENTER;
+        if(cur_lane == m_racer->getLane())
+            cur_lane++;
+            
+        ZombieCab* cab = new ZombieCab(cur_lane, VIEW_HEIGHT - SPRITE_HEIGHT / 2, this);
+        m_vector.push_back(cab);
+    }
 }
 
 bool StudentWorld::sprayFirstAppropriateActor(Actor* a)
@@ -260,11 +306,21 @@ bool StudentWorld::sprayFirstAppropriateActor(Actor* a)
 
 void StudentWorld::addActor(Actor* a)
 {
-    
     m_vector.push_back(a);
 }
 
-/*bool StudentWorld::hasCollInLane(Actor* a)
+bool StudentWorld::hasCollInLane(Actor* a)
 {
-    int lane /* = checkLane();
-}*/
+    const int NO_LANE = 0;  //actors aren't in the same lane on the road
+    const int LEFT_LANE = 1;
+    const int MIDDLE_LANE = 2;
+    const int RIGHT_LANE = 3;
+    if(a->getX() > LEFT_EDGE && a->getX() < left_middle)
+        return LEFT_LANE;
+    else if(a->getX() > left_middle && a->getX() < right_middle)
+        return MIDDLE_LANE;
+    else if(a->getX() > right_middle && a->getX() < RIGHT_EDGE)
+        return RIGHT_LANE;
+    else
+        return NO_LANE;
+}

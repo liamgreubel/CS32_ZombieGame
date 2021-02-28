@@ -65,6 +65,7 @@ public:
     virtual int checkLane(Actor* a);
     
     int getLane();
+
     
 private:
     StudentWorld* m_world;
@@ -232,7 +233,6 @@ class ZombieCab : public Agent
 public:
     ZombieCab(double x, double y, StudentWorld* sw);
     virtual void doSomething();
-    //virtual bool beSprayedIfAppropriate();
     virtual ~ZombieCab();
     virtual int soundWhenDie() const {return SOUND_VEHICLE_DIE;}
     
@@ -247,7 +247,7 @@ class Spray : public Actor
 public:
     Spray(double x, double y, int dir, StudentWorld* sw);
     virtual void doSomething();
-    void hasOverlapped(/*Actor* other*/);
+    //void hasOverlapped(Actor* other);
     virtual ~Spray();
 private:
     int m_pixelsMoved;
