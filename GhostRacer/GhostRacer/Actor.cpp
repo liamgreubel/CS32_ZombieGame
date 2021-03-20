@@ -34,7 +34,7 @@ void Actor::movement()  //generic movement pattern used my most Actors
         setDead();
 }
 
-int Actor::checkLane(Actor* a)  //returns lane with corresponding actors. if no lane nor are collisionAvoidance, then returns 0. Coudln't finish in time
+int Actor::checkLane(Actor* a)  
 {
     if(a->isCollisionAvoidanceWorthy())
     {
@@ -137,7 +137,7 @@ void GhostRacer::doSomething()
                     Spray* spray = new Spray(delta_x+getX(),delta_y+getY(),dir,getWorld());
                     getWorld()->addActor(spray);
                     getWorld()->playSound(SOUND_PLAYER_SPRAY);
-                    //decrement spray
+                    //decrement number of sprays remaining
                     increaseSprays(-1);
                 }
                 break;
@@ -288,8 +288,7 @@ void HumanPedestrian::doSomething()
     }
 }
 
-//function doesn't work yet, but is intended to flip the direction of
-//a human PED when sprayed with water, returning true for successful change
+
 bool HumanPedestrian::beSprayedIfAppropriate()
 {
     setHorizSpeed(getHorizSpeed() * -1);
@@ -358,8 +357,6 @@ void ZombiePedestrian::doSomething()
     moveAndPossiblyPickPlan();
 }
 
-//when fully implemented, will decrement the Zombie Ped's health
-//and set dead if applicable
 bool ZombiePedestrian::beSprayedIfAppropriate()
 {
     changeHP(-1);
@@ -370,7 +367,6 @@ bool ZombiePedestrian::beSprayedIfAppropriate()
     return true;
 }
 
-//class directly inherited from Agent class - NOT FINISHED
 ZombieCab::ZombieCab(double x, double y, StudentWorld* sw)
 : Agent(IID_ZOMBIE_CAB, x, y, 90, 4.0, sw), m_plan(0), m_hasDamaged(false)
 {
@@ -381,7 +377,6 @@ ZombieCab::ZombieCab(double x, double y, StudentWorld* sw)
 
 ZombieCab::~ZombieCab() {}
 
-//for every tick (NOT FINISHED):
 void ZombieCab::doSomething()
 {
     if(isDead())
@@ -446,7 +441,7 @@ void BorderLine::doSomething()
 }
 
 
-//class directly inheeriting from BorderLine class
+//class directly inheriting from BorderLine class
 Yellow::Yellow(double x, double y, StudentWorld* world)
 : BorderLine(IID_YELLOW_BORDER_LINE, x, y,world)
 {}
@@ -454,7 +449,7 @@ Yellow::Yellow(double x, double y, StudentWorld* world)
 Yellow::~Yellow() {}
 
 
-//class directly inheeriting from BorderLine class
+//class directly inheriting from BorderLine class
 White::White(double x, double y, StudentWorld* world)
 : BorderLine(IID_WHITE_BORDER_LINE, x, y, world)
 {}
@@ -469,7 +464,6 @@ Spray::Spray(double x, double y, int dir, StudentWorld* world)
 
 Spray::~Spray() {}
 
-//for every tick (NOT FINISHED - BUGGED):
 void Spray::doSomething()
 {
     if(isDead())
